@@ -1,5 +1,6 @@
 package com.vrublack.nutrition.console;
 
+import com.vrublack.nutrition.core.Pair;
 import com.vrublack.nutrition.core.SearchHistory;
 import com.vrublack.nutrition.core.SearchStringStat;
 
@@ -21,7 +22,7 @@ public class LocalSearchHistory implements SearchHistory
         ObjectInputStream ois = null;
         try
         {
-             ois = new ObjectInputStream(new FileInputStream(new File(LOCAL_FILE_PATH)));
+            ois = new ObjectInputStream(new FileInputStream(new File(LOCAL_FILE_PATH)));
             stats = (ArrayList<SearchStringStat>) ois.readObject();
         } catch (IOException e)
         {
@@ -57,36 +58,56 @@ public class LocalSearchHistory implements SearchHistory
     }
 
     @Override
-    public void putNDBNumberForSearchResult(String searchString, String selectedNDBNumber)
+    public void putNDBNumberForSearchResult(final String searchString, final String selectedNDBNumber)
     {
-        for (SearchStringStat stat : stats)
+        // this can be offloaded into a background thread
+        Thread t = new Thread()
         {
-            if (stat.getSearchString().trim().equalsIgnoreCase(searchString.trim()))
+            @Override
+            public void run()
             {
-                stat.putResult(selectedNDBNumber);
-                return;
-            }
-        }
+                SearchStringStat existing = null;
+                for (SearchStringStat stat : stats)
+                {
+                    if (stat.getSearchString().trim().equalsIgnoreCase(searchString.trim()))
+                    {
+                        existing = stat;
+                        break;
+                    }
+                }
 
-        // immediately save
-        ObjectOutputStream oos = null;
-        try
-        {
-            oos = new ObjectOutputStream(new FileOutputStream(new File(LOCAL_FILE_PATH)));
-            oos.writeObject(stats);
-        } catch (IOException e)
-        {
-            e.printStackTrace();
-        } finally
-        {
-            if (oos != null)
+                if (existing == null)
+                {
+                    existing = new SearchStringStat(searchString);
+                    stats.add(existing);
+                }
+
+                existing.putResult(selectedNDBNumber);
+
+
+                // immediately save
+                ObjectOutputStream oos = null;
                 try
                 {
-                    oos.close();
+                    oos = new ObjectOutputStream(new FileOutputStream(new File(LOCAL_FILE_PATH)));
+                    oos.writeObject(stats);
                 } catch (IOException e)
                 {
                     e.printStackTrace();
+                } finally
+                {
+                    if (oos != null)
+                        try
+                        {
+                            oos.close();
+                        } catch (IOException e)
+                        {
+                            e.printStackTrace();
+                        }
                 }
-        }
+            }
+        };
+
+        t.start();
     }
 }
