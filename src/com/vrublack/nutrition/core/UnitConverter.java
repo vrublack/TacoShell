@@ -366,6 +366,9 @@ public class UnitConverter
      */
     public static float convert(NutrientQuantity source, NutrientQuantity desired, Specification.NutrientType nutrientType) throws IllegalArgumentException
     {
+        if (source == null)
+            return 0;
+
         // same unit?
         if (source.getUnit() == desired.getUnit())
             return source.getAmountInUnit() / desired.getAmountInUnit();
