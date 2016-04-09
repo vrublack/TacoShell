@@ -95,6 +95,37 @@ public class DailyRecord implements Serializable, IsSerializable
     }
 
     /**
+     * Calculates each macronutrient's share of total calories consumed.
+     *
+     * @return Number in the range [0, 100] of carbs, fat and protein
+     */
+    public float[] calculateMacroRatio()
+    {
+        float[] nutrientGrams = {0, 0, 0};
+        Specification.NutrientType[] macroNutrients =
+                {Specification.NutrientType.Carbohydrates,
+                        Specification.NutrientType.Fat,
+                        Specification.NutrientType.Protein};
+        float calorieSum = 0;
+        final NutrientQuantity targetQuantity = new NutrientQuantity(1, NutrientQuantity.Unit.g);
+        for (Specification s : entries)
+        {
+            calorieSum += s.getCalories();
+            for (int i = 0; i < macroNutrients.length; i++)
+                nutrientGrams[i] += UnitConverter.convert(s.getNutrient(macroNutrients[i]), targetQuantity, macroNutrients[i]);
+        }
+
+        if (calorieSum == 0)
+            return new float[] {0, 0, 0};
+
+        return new float[] {
+                100 * nutrientGrams[0] * 4 / calorieSum,
+                100 * nutrientGrams[1] * 9 / calorieSum,
+                100 * nutrientGrams[2] * 4 / calorieSum,
+        };
+    }
+
+    /**
      * Remembers specific state of an instance of DailyRecord, so it can be restored using undo
      */
     public static class Memento
