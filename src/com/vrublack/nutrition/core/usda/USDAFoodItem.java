@@ -97,8 +97,7 @@ public class USDAFoodItem extends SearchableFoodItem implements IsSerializable, 
     public float getCaloriesPerQuantity(FoodQuantity quantity)
     {
         // the unit has to be converted to 100 grams because that's what the kcal are specified in
-        FoodQuantity desired = new FoodQuantity(100, "g", null);
-        float hundredGramQuantifier = UnitConverter.convert(quantity, desired, conversionDefs);
+        float hundredGramQuantifier = UnitConverter.convert(quantity, referenceQuantity, conversionDefs);
         return kcal * hundredGramQuantifier;
     }
 

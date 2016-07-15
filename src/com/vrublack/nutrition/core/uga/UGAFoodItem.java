@@ -14,14 +14,22 @@ public class UGAFoodItem extends SearchableFoodItem implements Serializable
 
     private String name;
 
-    private Serving[] servings;
+    // Quantity per which the nutrients are specified
+    private FoodQuantity quantity;
+
+    private float calories;
+
+    // How many nutrients are in [quantity] of the food
+    private Map<Specification.NutrientType, NutrientQuantity> nutrients;
+
+    private UnitConverter.ConversionDefinition[] conversionDefs;
 
     private Set<String> locations = new HashSet<>();
 
     // for search
     private DescriptionComp[] descriptionComps;
 
-    public UGAFoodItem(String name, Serving serving)
+    public UGAFoodItem(String name, FoodQuantity quantity, float kcal, Map<Specification.NutrientType, NutrientQuantity> nutrients)
     {
         this.id = Integer.toString(Math.abs(name.hashCode()));
         // limit id to 7 characters
@@ -30,9 +38,17 @@ public class UGAFoodItem extends SearchableFoodItem implements Serializable
 
         this.name = name;
         // currently only one serving
-        this.servings = new Serving[]{serving};
+        this.quantity = quantity;
+
+        this.calories = kcal;
+        this.nutrients = nutrients;
 
         this.descriptionComps = parseDescriptionComps(name);
+
+        // the quantity is always one serving
+        conversionDefs = new UnitConverter.ConversionDefinition[1];
+        conversionDefs[0] = new UnitConverter.ConversionDefinition(quantity.getQuantifier(), quantity.getSimpleUnit(), quantity.getDetailedUnit(),
+                1, "serving", "serving");
     }
 
     public UGAFoodItem()
@@ -113,17 +129,9 @@ public class UGAFoodItem extends SearchableFoodItem implements Serializable
     @Override
     public float getCaloriesPerQuantity(FoodQuantity quantity)
     {
-        for (Serving serving : servings)
-        {
-            if (UnitConverter.isConvertible(quantity.getSimpleUnit(), serving.quantity.getSimpleUnit()))
-            {
-                float servingQuantifier = UnitConverter.convert(quantity.getQuantifier(), quantity.getSimpleUnit(),
-                        serving.quantity.getQuantifier(), serving.quantity.getSimpleUnit());
-                return serving.calories * servingQuantifier;
-            }
-        }
-
-        throw new IllegalArgumentException("No supported unit");
+        // convert specified quantity into the quantity that the nutrients of this item are specified in
+        float quantifier = UnitConverter.convert(quantity, this.quantity, conversionDefs);
+        return calories * quantifier;
     }
 
     @Override
@@ -135,21 +143,13 @@ public class UGAFoodItem extends SearchableFoodItem implements Serializable
     @Override
     public NutrientQuantity getNutrientPerQuantity(Specification.NutrientType type, FoodQuantity quantity)
     {
-        for (Serving serving : servings)
-        {
-            if (UnitConverter.isConvertible(quantity.getSimpleUnit(), serving.quantity.getSimpleUnit()))
-            {
-                float servingQuantifier = UnitConverter.convert(quantity.getQuantifier(), quantity.getSimpleUnit(),
-                        serving.quantity.getQuantifier(), serving.quantity.getSimpleUnit());
-                NutrientQuantity nutrientQuantity = serving.nutrients.get(type);
-                if (nutrientQuantity != null)
-                    return nutrientQuantity.scale(servingQuantifier);
-                else
-                    return null;
-            }
-        }
-
-        throw new IllegalArgumentException("No supported unit");
+        // convert specified quantity into the quantity that the nutrients of this item are specified in
+        float quantifier = UnitConverter.convert(quantity, this.quantity, conversionDefs);
+        NutrientQuantity nutrientQuantity = nutrients.get(type);
+        if (nutrientQuantity != null)
+            return nutrientQuantity.scale(quantifier);
+        else
+            return null;
     }
 
     @Override
@@ -173,10 +173,8 @@ public class UGAFoodItem extends SearchableFoodItem implements Serializable
     {
         List<FoodQuantity> acceptedUnits = new ArrayList<>();
 
-        for (Serving serving : servings)
-        {
-            acceptedUnits.add(new FoodQuantity(1, serving.quantity.getSimpleUnit(), serving.quantity.getDetailedUnit()));
-        }
+        acceptedUnits.add(quantity);
+        acceptedUnits.add(new FoodQuantity(1, "serving", "serving"));
 
         return acceptedUnits.toArray(new FoodQuantity[acceptedUnits.size()]);
     }
@@ -218,39 +216,14 @@ public class UGAFoodItem extends SearchableFoodItem implements Serializable
     @Override
     public String getNutritionInformation()
     {
-        NutrientQuantity carbs = servings[0].nutrients.get(Specification.NutrientType.Carbohydrates);
-        NutrientQuantity protein = servings[0].nutrients.get(Specification.NutrientType.Protein);
-        NutrientQuantity fat = servings[0].nutrients.get(Specification.NutrientType.Fat);
-        float kcal = servings[0].calories;
+        NutrientQuantity carbs = nutrients.get(Specification.NutrientType.Carbohydrates);
+        NutrientQuantity protein = nutrients.get(Specification.NutrientType.Protein);
+        NutrientQuantity fat = nutrients.get(Specification.NutrientType.Fat);
+        float kcal = calories;
 
-        return "Per 100g - Calories: " + kcal
+        return "Per " + quantity.toString() + " - Calories: " + kcal
                 + "kcal | Fat: " + (fat == null ? "-" : fat)
                 + " | Carbs: " + (carbs == null ? "-" : carbs)
                 + " | Protein: " + (protein == null ? "-" : protein);
-    }
-
-    public static class Serving implements Serializable
-    {
-        private static final long serialVersionUID = 14235;
-
-        // eg. 10 pieces
-        private FoodQuantity quantity;
-
-        private float calories;
-
-        private Map<Specification.NutrientType, NutrientQuantity> nutrients;
-
-        public Serving(float quantifier, String unit, float calories, Map<Specification.NutrientType, NutrientQuantity> nutrients)
-        {
-            quantity = new FoodQuantity(quantifier, getSimpleUnit(unit), unit);
-
-            this.calories = calories;
-            this.nutrients = nutrients;
-        }
-
-        public Serving()
-        {
-
-        }
     }
 }

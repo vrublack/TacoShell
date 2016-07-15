@@ -3,10 +3,7 @@ package com.vrublack.nutrition.core.uga;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonSyntaxException;
-import com.vrublack.nutrition.core.NutrientQuantity;
-import com.vrublack.nutrition.core.Pair;
-import com.vrublack.nutrition.core.ParseException;
-import com.vrublack.nutrition.core.Specification;
+import com.vrublack.nutrition.core.*;
 import com.vrublack.nutrition.core.util.HTTPRequest;
 
 import java.io.IOException;
@@ -171,9 +168,7 @@ public class UGAScraper
                     }
                 }
 
-                UGAFoodItem.Serving serving = new UGAFoodItem.Serving(quantifier, unit, kcal, nutrients);
-
-                UGAFoodItem item = new UGAFoodItem(name, serving);
+                UGAFoodItem item = new UGAFoodItem(name, new FoodQuantity(quantifier, unit, unit), kcal, nutrients);
                 item.addLocation(diningHall);
                 items.add(item);
 
