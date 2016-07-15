@@ -1,5 +1,6 @@
 package com.vrublack.nutrition.core.fatsecret;
 
+import com.sun.istack.internal.Nullable;
 import com.vrublack.nutrition.core.*;
 
 import java.io.Serializable;
@@ -66,7 +67,7 @@ public class FatSecretFoodItem extends FoodItem implements Serializable
             }
 
             // metric unit
-            if (UnitConverter.isConvertible(quantity.getSimpleUnit(), serving.metricQuantity.getSimpleUnit()))
+            if (serving.metricQuantity != null && UnitConverter.isConvertible(quantity.getSimpleUnit(), serving.metricQuantity.getSimpleUnit()))
             {
                 float servingQuantifier = UnitConverter.convert(quantity.getQuantifier(), quantity.getSimpleUnit(),
                         serving.metricQuantity.getQuantifier(), serving.metricQuantity.getSimpleUnit());
@@ -100,7 +101,7 @@ public class FatSecretFoodItem extends FoodItem implements Serializable
             }
 
             // metric unit
-            if (UnitConverter.isConvertible(quantity.getSimpleUnit(), serving.metricQuantity.getSimpleUnit()))
+            if (serving.metricQuantity != null && UnitConverter.isConvertible(quantity.getSimpleUnit(), serving.metricQuantity.getSimpleUnit()))
             {
                 float servingQuantifier = UnitConverter.convert(quantity.getQuantifier(), quantity.getSimpleUnit(),
                         serving.metricQuantity.getQuantifier(), serving.metricQuantity.getSimpleUnit());
@@ -140,7 +141,7 @@ public class FatSecretFoodItem extends FoodItem implements Serializable
         {
             acceptedUnits.add(new FoodQuantity(1, serving.quantity.getSimpleUnit(), serving.quantity.getDetailedUnit()));
             // was the metric unit already added?
-            String metricUnit = serving.metricQuantity.getSimpleUnit();
+            String metricUnit = serving.metricQuantity != null ? serving.metricQuantity.getSimpleUnit() : null;
             if (metricUnit != null)
             {
                 boolean alreadyAdded = false;
@@ -186,7 +187,10 @@ public class FatSecretFoodItem extends FoodItem implements Serializable
     {
         private static final long serialVersionUID = 14235;
 
+        // eg. 10 pieces
         private FoodQuantity quantity;
+        // eg. 10 oz. May be null
+        @Nullable
         private FoodQuantity metricQuantity;
 
         private float calories;
@@ -196,7 +200,11 @@ public class FatSecretFoodItem extends FoodItem implements Serializable
         public Serving(float quantifier, String unit, float metricQuantifier, String metricUnit, float calories, Map<Specification.NutrientType, NutrientQuantity> nutrients)
         {
             quantity = new FoodQuantity(quantifier, getSimpleUnit(unit), unit);
-            metricQuantity = new FoodQuantity(metricQuantifier, getSimpleUnit(metricUnit), metricUnit);
+
+            if (metricUnit != null)
+                metricQuantity = new FoodQuantity(metricQuantifier, getSimpleUnit(metricUnit), metricUnit);
+            else
+                metricQuantity = null;
 
             this.calories = calories;
             this.nutrients = nutrients;

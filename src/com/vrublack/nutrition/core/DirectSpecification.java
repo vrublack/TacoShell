@@ -1,5 +1,7 @@
 package com.vrublack.nutrition.core;
 
+import com.vrublack.nutrition.core.util.StringGenerator;
+
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;

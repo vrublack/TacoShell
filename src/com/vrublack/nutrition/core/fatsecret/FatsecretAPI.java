@@ -186,8 +186,10 @@ public class FatsecretAPI implements SyncFoodDataSource
             // String servingID = serving.get("serving_id").getAsString();
             // String servingDescription = serving.get("serving_description").getAsString();
             // String servingUrl = serving.get("serving_url").getAsString();
-            float metricServingAmount = Float.parseFloat(serving.get("metric_serving_amount").getAsString());
-            String metricServingUnit = serving.get("metric_serving_unit").getAsString();
+            float metricServingAmount = serving.has("metric_serving_amount") ?
+                    Float.parseFloat(serving.get("metric_serving_amount").getAsString()) : -1;
+            String metricServingUnit = serving.has("metric_serving_unit") ?
+                    serving.get("metric_serving_unit").getAsString() : null;
             float numberOfUnits = Float.parseFloat(serving.get("number_of_units").getAsString());
             String measurementDescription = serving.get("measurement_description").getAsString();
             float calories = Float.parseFloat(serving.get("calories").getAsString());

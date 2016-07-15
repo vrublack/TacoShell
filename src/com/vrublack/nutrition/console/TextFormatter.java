@@ -2,6 +2,7 @@ package com.vrublack.nutrition.console;
 
 import com.vrublack.nutrition.core.*;
 import com.vrublack.nutrition.core.Formatter;
+import com.vrublack.nutrition.core.Pair;
 
 import java.text.SimpleDateFormat;
 import java.util.*;

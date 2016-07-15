@@ -1,6 +1,5 @@
 package com.vrublack.nutrition.console;
 
-import com.vrublack.nutrition.core.Pair;
 import com.vrublack.nutrition.core.SearchHistory;
 import com.vrublack.nutrition.core.SearchStringStat;
 

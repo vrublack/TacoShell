@@ -1,4 +1,4 @@
-package com.vrublack.nutrition.core;
+package com.vrublack.nutrition.core.util;
 
 public class StringGenerator
 {
