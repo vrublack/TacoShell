@@ -19,8 +19,39 @@ public class UGAScraper
     {
         List<UGAFoodItem> all = new ArrayList<>();
 
-        for (String site : DINING_HALLS)
-            all.addAll(scrapeLocation(BASE_URL, site));
+        Thread[] workers = new Thread[DINING_HALLS.length];
+
+        final List<List<UGAFoodItem>> threadResults = new ArrayList<>();
+
+        for (int i = 0; i < DINING_HALLS.length; i++)
+        {
+            final int _i = i;
+
+            threadResults.add(null);
+            workers[i] = new Thread()
+            {
+                @Override
+                public void run()
+                {
+                    threadResults.set(_i, scrapeLocation(BASE_URL, DINING_HALLS[_i]));
+                }
+            };
+        }
+
+        for (Thread worker : workers)
+            worker.start();
+
+        for (Thread worker : workers)
+            try
+            {
+                worker.join();
+            } catch (InterruptedException e)
+            {
+                e.printStackTrace();
+            }
+
+        for (int i = 0; i < DINING_HALLS.length; i++)
+            all.addAll(threadResults.get(i));
 
         // Many food items are available in multiple dining halls. Merge those.
         // Assume that food items are identical if and only if the names (=ids) are identical
