@@ -26,6 +26,8 @@ public class UGAFoodItem extends SearchableFoodItem implements Serializable
 
     private Set<String> locations = new HashSet<>();
 
+    private FoodQuantity servingQuantity;
+
     // for search
     private DescriptionComp[] descriptionComps;
 
@@ -45,10 +47,12 @@ public class UGAFoodItem extends SearchableFoodItem implements Serializable
 
         this.descriptionComps = parseDescriptionComps(name);
 
+        this.servingQuantity = new FoodQuantity(1, "serving", "serving (" + quantity + ")");
+
         // the quantity is always one serving
         conversionDefs = new UnitConverter.ConversionDefinition[1];
         conversionDefs[0] = new UnitConverter.ConversionDefinition(quantity.getQuantifier(), quantity.getSimpleUnit(), quantity.getDetailedUnit(),
-                1, "serving", "serving");
+                servingQuantity.getQuantifier(), servingQuantity.getSimpleUnit(), servingQuantity.getDetailedUnit());
     }
 
     public UGAFoodItem()
@@ -174,7 +178,7 @@ public class UGAFoodItem extends SearchableFoodItem implements Serializable
         List<FoodQuantity> acceptedUnits = new ArrayList<>();
 
         acceptedUnits.add(quantity);
-        acceptedUnits.add(new FoodQuantity(1, "serving", "serving"));
+        acceptedUnits.add(servingQuantity);
 
         return acceptedUnits.toArray(new FoodQuantity[acceptedUnits.size()]);
     }
