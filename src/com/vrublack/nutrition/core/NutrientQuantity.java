@@ -22,7 +22,6 @@ public class NutrientQuantity implements IsSerializable, Serializable
 
     private float amountInUnit;
 
-
     /**
      * @param input Unit that the user has entered
      * @return Unit or null if the input wasn't recognized. Capitalization and whitespaces are removed.
@@ -47,6 +46,57 @@ public class NutrientQuantity implements IsSerializable, Serializable
     {
         this.amountInUnit = amountInUnit;
         this.unit = unit;
+    }
+
+    /**
+     *
+     * @param str A quantifier, followed by a unit (eg. "3.75 Mg")
+     * @return Parsed Nutrient Quantity
+     */
+    public static NutrientQuantity parseFromString(String str) throws ParseException
+    {
+        str = str.toLowerCase();
+
+        int unitStart = -1;
+        for (int i = 0; i < str.length(); i++)
+        {
+            char c = str.charAt(i);
+            if (c >= 'a' && c <= 'z')
+            {
+                unitStart = i;
+                break;
+            }
+        }
+
+        if (unitStart == -1)
+            throw new ParseException("No unit");
+        else if (unitStart == 0)
+            throw new ParseException("No quantifier");
+
+        float quantifier = Float.parseFloat(str.substring(0, unitStart));
+        String unitStr = str.substring(unitStart);
+        Unit unit;
+
+        switch (unitStr)
+        {
+            case "g": unit = Unit.g;
+                break;
+            case "mg": unit = Unit.Mg;
+                break;
+            case "microg": unit = Unit.Microg;
+                break;
+            case "iu": unit = Unit.Microg;
+                break;
+            case "%":
+            case "percent": unit = Unit.Percent;
+                break;
+            default: unit = null;
+        }
+
+        if (unit == null)
+            throw new ParseException("Invalid unit");
+
+        return new NutrientQuantity(quantifier, unit);
     }
 
     // default constructor so this class can be serialized

@@ -3,6 +3,7 @@ package com.vrublack.nutrition.console;
 
 import com.vrublack.nutrition.core.*;
 import com.vrublack.nutrition.core.fatsecret.FatsecretAPI;
+import com.vrublack.nutrition.core.uga.UGAFoodServices;
 import com.vrublack.nutrition.core.userdb.UserFoodDatabase;
 import com.vrublack.nutrition.core.userdb.UserFoodItem;
 import org.ini4j.Ini;
@@ -462,7 +463,7 @@ public class Console
                 // UNDO
                 "(no arguments)",
                 // SOURCE
-                "[source]\n\tsource:\t\"USDA\" (http://www.ars.usda.gov/Services/docs.htm?docid=24936) or \"FatSecret\" (https://www.fatsecret.com)",
+                "[source]\n\tsource:\t\"USDA\" (http://www.ars.usda.gov/Services/docs.htm?docid=24936), \"FatSecret\" (https://www.fatsecret.com) or \"UGA\" (http://foodservice.uga.edu/locations)",
                 // HELP
                 "[command]\n\tcommand:\tCommand to show options for"
 
@@ -515,8 +516,12 @@ public class Console
                 dataSource = new LocalUSDAFoodDatabase();
                 System.out.println("Data source switched to USDA Database");
                 break;
+            case "uga":
+                dataSource = new UGAFoodServices();
+                System.out.println("Data source switched to the University of Georgia");
+                break;
             default:
-                System.out.println("Unknown datasource. Available datasources are fatsecret and usda.");
+                System.out.println("Unknown datasource. Available datasources are fatsecret, usda and uga.");
                 break;
         }
     }
