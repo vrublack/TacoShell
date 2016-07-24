@@ -2,6 +2,7 @@ package com.vrublack.nutrition.console;
 
 
 import com.vrublack.nutrition.core.*;
+import com.vrublack.nutrition.core.Formatter;
 import com.vrublack.nutrition.core.fatsecret.FatsecretAPI;
 import com.vrublack.nutrition.core.uga.UGAFoodServices;
 import com.vrublack.nutrition.core.userdb.UserFoodDatabase;
@@ -41,6 +42,14 @@ public class Console
         if (console.dataSource == null)
             console.dataSource = new LocalUSDAFoodDatabase();
 
+
+        console.formatter = readIniFile();
+
+        console.startInputLoop();
+    }
+
+    private static TextFormatter readIniFile()
+    {
         List<Specification.NutrientType> nutrientTypes = null;
         List<NutrientQuantity.Unit> units = null;
         // load .ini preferences
@@ -126,9 +135,7 @@ public class Console
             }
         }
 
-        console.formatter = new TextFormatter(nutrientTypes, units);
-
-        console.startInputLoop();
+        return new TextFormatter(nutrientTypes, units);
     }
 
     private void startInputLoop()
@@ -216,14 +223,6 @@ public class Console
                 {
                     String expression = input.substring("source ".length());
                     switchDatasource(expression);
-                } else if (input.startsWith("show "))
-                {
-                    String expression = input.substring("show ".length());
-                    showColumn(expression, true);
-                } else if (input.startsWith("hide "))
-                {
-                    String expression = input.substring("hide ".length());
-                    showColumn(expression, false);
                 } else if (input.startsWith("help"))
                 {
                     // either "help" or "help [command]"
@@ -766,18 +765,6 @@ public class Console
                     System.out.println("Invalid command. Type in \"more\" or \"esc\"");
             } while (true);
         }
-    }
-
-    private void showColumn(String input, boolean show)
-    {
-        Specification.NutrientType type = Specification.getNutrientForUserInput(input);
-        if (type == null)
-        {
-            System.out.println("Nutrient not recognized");
-            return;
-        }
-
-
     }
 
     private void foodInput(String input, boolean quickAdd, boolean microNutrientsOnly)
