@@ -5,6 +5,8 @@ import java.io.Serializable;
 
 public abstract class FoodItem implements Serializable
 {
+    private static final long serialVersionUID = 4956085901145474830L;
+
     /**
      * @return String that uniquely identifies this items within the food data source where the item is from.
      */
