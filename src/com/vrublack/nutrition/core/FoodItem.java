@@ -42,4 +42,10 @@ public abstract class FoodItem implements Serializable
      * @return List of units that are accepted in getNutrientPerQuantity(...). It must return at least one unit.
      */
     public abstract FoodQuantity[] getAcceptedUnits();
+
+    @Override
+    public String toString()
+    {
+        return getDescription();
+    }
 }
