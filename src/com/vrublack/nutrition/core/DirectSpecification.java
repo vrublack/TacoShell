@@ -57,14 +57,15 @@ public class DirectSpecification extends Specification implements Serializable
 
     /**
      * @param nutrientType Type of nutrient to add
-     * @param amount       Amount in grams
+     * @param unit         Unit for amount
+     * @param amount       Amount in unit
      */
-    public void putNutrient(Specification.NutrientType nutrientType, Float amount)
+    public void putNutrient(Specification.NutrientType nutrientType, NutrientQuantity.Unit unit, Float amount)
     {
         compatibilityFix();
 
         nutrients.put(nutrientType, amount);
-        nutrientUnits.put(nutrientType, NutrientQuantity.Unit.g);
+        nutrientUnits.put(nutrientType, unit);
         nutrientsSpecified = true;
     }
 

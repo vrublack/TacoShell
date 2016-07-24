@@ -3,6 +3,8 @@ package com.vrublack.nutrition.core;
 import com.google.gwt.user.client.rpc.IsSerializable;
 
 import java.io.Serializable;
+import java.util.HashMap;
+import java.util.Map;
 
 public class NutrientQuantity implements IsSerializable, Serializable
 {
@@ -18,6 +20,19 @@ public class NutrientQuantity implements IsSerializable, Serializable
         Percent  // per cent of recommended daily value based on a 2000-calorie diet
     }
 
+    private static final Map<Unit, String[]> aliases = new HashMap<>();
+
+    static
+    {
+        // this allows for error tolerance of user input
+
+        aliases.put(Unit.g, new String[]{"grams", "gram"});
+        aliases.put(Unit.Mg, new String[]{"milligram", "milligrams"});
+        aliases.put(Unit.Microg, new String[]{"micrograms", "microgram"});
+        aliases.put(Unit.Percent, new String[]{"%"});
+    }
+
+
     private Unit unit;
 
     private float amountInUnit;
@@ -29,10 +44,19 @@ public class NutrientQuantity implements IsSerializable, Serializable
     public static Unit getUnitForUserInput(String input)
     {
         input = input.toLowerCase().replace(" ", "");
-        for (Unit unit : Unit.values())
+        input = input.toLowerCase().replace("-", "");
+        for (Unit type : Unit.values())
         {
-            if (unit.name().toLowerCase().replace(" ", "").equals(input))
-                return unit;
+            if (type.name().toLowerCase().replace(" ", "").equals(input))
+                return type;
+
+            // search aliases
+            if (aliases.containsKey(type))
+            {
+                for (String alias : aliases.get(type))
+                    if (alias.toLowerCase().replace(" ", "").equals(input))
+                        return type;
+            }
         }
 
         return null;
@@ -49,7 +73,6 @@ public class NutrientQuantity implements IsSerializable, Serializable
     }
 
     /**
-     *
      * @param str A quantifier, followed by a unit (eg. "3.75 Mg")
      * @return Parsed Nutrient Quantity
      */
@@ -79,18 +102,24 @@ public class NutrientQuantity implements IsSerializable, Serializable
 
         switch (unitStr)
         {
-            case "g": unit = Unit.g;
+            case "g":
+                unit = Unit.g;
                 break;
-            case "mg": unit = Unit.Mg;
+            case "mg":
+                unit = Unit.Mg;
                 break;
-            case "microg": unit = Unit.Microg;
+            case "microg":
+                unit = Unit.Microg;
                 break;
-            case "iu": unit = Unit.Microg;
+            case "iu":
+                unit = Unit.Microg;
                 break;
             case "%":
-            case "percent": unit = Unit.Percent;
+            case "percent":
+                unit = Unit.Percent;
                 break;
-            default: unit = null;
+            default:
+                unit = null;
         }
 
         if (unit == null)

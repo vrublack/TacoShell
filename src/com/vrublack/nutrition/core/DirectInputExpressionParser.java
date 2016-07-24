@@ -1,18 +1,14 @@
 package com.vrublack.nutrition.core;
 
+import com.vrublack.nutrition.core.Specification.NutrientType;
+
+import static com.vrublack.nutrition.core.Specification.getNutrientForUserInput;
+
 /**
  * Parses expressions like "60g of Protein"
  */
 public class DirectInputExpressionParser
 {
-    private enum AcceptedType
-    {
-        Kcal,
-        Carbohydrates,
-        Fat,
-        Protein
-    }
-
     private Tokenizer tokenizer;
 
     /**
@@ -47,7 +43,7 @@ public class DirectInputExpressionParser
                 exception = e;
             }
 
-            String unit = null;
+            NutrientQuantity.Unit unit = null;
             try
             {
                 unit = parseUnit();
@@ -65,7 +61,7 @@ public class DirectInputExpressionParser
                 tokenizer.next();
             }
 
-            AcceptedType type = parseFoodDescription();
+            NutrientType type = parseFoodDescription();
             if (type != null && exception != null)
             {
                 // that means that the expression can be interpreted as a direct input expression (because the description is
@@ -77,9 +73,9 @@ public class DirectInputExpressionParser
                 return null;
             } else
             {
-                if (type == AcceptedType.Kcal)
+                if (type == NutrientType.Kcal)
                 {
-                    if (!unit.isEmpty())
+                    if (unit != null)
                         throw new ParseException("A unit for calories isn't allowed!");
                     else if (directSpecification.isNutrientSpecified())
                         throw new ParseException("You can't specify calories and nutrients at the same time.");
@@ -89,20 +85,10 @@ public class DirectInputExpressionParser
                 {
                     if (directSpecification.isCaloriesSpecified())
                         throw new ParseException("You can't specify calories and nutrients at the same time.");
-                    if (unit.isEmpty())
-                        unit = "g";     // grams is implicit unit
-                    float convertedQuantifier = UnitConverter.convert(quantifier, unit, 1, "g");
+                    if (unit == null)
+                        unit = NutrientQuantity.Unit.g;     // grams is implicit unit
 
-                    if (type == AcceptedType.Carbohydrates)
-                    {
-                        directSpecification.putNutrient(Specification.NutrientType.Carbohydrates, convertedQuantifier);
-                    } else if (type == AcceptedType.Protein)
-                    {
-                        directSpecification.putNutrient(Specification.NutrientType.Protein, convertedQuantifier);
-                    } else if (type == AcceptedType.Fat)
-                    {
-                        directSpecification.putNutrient(Specification.NutrientType.Fat, convertedQuantifier);
-                    }
+                    directSpecification.putNutrient(type, unit, quantifier);
                 }
             }
 
@@ -157,22 +143,40 @@ public class DirectInputExpressionParser
         }
     }
 
-    private String parseUnit() throws ParseException
+    private NutrientQuantity.Unit parseUnit() throws ParseException
     {
         String next = tokenizer.peek();
         if (next == null)
             throw new ParseException("Unexpected end of string!");
-        // return empty string if the user didn't specify a segment
-        if (Tokenizer.getSegmentType(next) != Tokenizer.SegmentType.Letter || getNutrient(next) != null)
+
+        // return null if the user didn't specify a number segment or if it's a nutrient
+
+        if (Tokenizer.getSegmentType(next) == Tokenizer.SegmentType.Number)
         {
-            return "";
+            return null;
         }
 
-        String unit = UnitConverter.getUnitForUserInput(next);
-        if (UnitConverter.getUnitType(unit) != UnitConverter.UnitType.Mass)
+        boolean nextIsNutrient = false;
+
+        String nextNext = tokenizer.peek();
+        // certain nutrients have a space in them, e.g. "vitamin c" so we have to look at the next one
+        if (nextNext != null)
+        {
+            NutrientType compositeNutrient = getNutrientForUserInput(next + nextNext);
+            if (compositeNutrient != null)
+                nextIsNutrient = true;
+        }
+        if (!nextIsNutrient && getNutrientForUserInput(next) != null)
+            nextIsNutrient = true;
+
+        if (nextIsNutrient)
+            return null;
+
+        NutrientQuantity.Unit unit = NutrientQuantity.getUnitForUserInput(next);
+        if (unit == null)
         {
             tokenizer.next();
-            throw new ParseException("Only mass units (g, kg, ...) are allowed for direct input!");
+            throw new ParseException("Unrecognized unit: " + next);
         }
 
         tokenizer.next();
@@ -180,41 +184,26 @@ public class DirectInputExpressionParser
         return unit;
     }
 
-    private AcceptedType getNutrient(String nutrientStr)
-    {
-        switch (nutrientStr.toLowerCase())
-        {
-            case "kcal":
-            case "kcals":
-            case "calories":
-            case "calorie":
-            case "cal":
-                return AcceptedType.Kcal;
-            case "carbohydrates":
-            case "carbohydrate":
-            case "carbs":
-            case "carb":
-            case "c":
-                return AcceptedType.Carbohydrates;
-            case "protein":
-            case "proteins":
-            case "p":
-                return AcceptedType.Protein;
-            case "fat":
-            case "fats":
-            case "f":
-                return AcceptedType.Fat;
-            default:
-                return null;
-        }
-    }
-
-    private AcceptedType parseFoodDescription()
+    private NutrientType parseFoodDescription()
     {
         String description = tokenizer.next();
         if (description == null)
             return null;
-        return getNutrient(description);
+
+        String nextDescription = tokenizer.peek();
+
+        // certain nutrients have a space in them, e.g. "vitamin c" so we have to look at the next one
+        if (nextDescription != null)
+        {
+            NutrientType compositeNutrient = getNutrientForUserInput(description + nextDescription);
+            if (compositeNutrient != null)
+            {
+                tokenizer.next();
+                return compositeNutrient;
+            }
+        }
+
+        return getNutrientForUserInput(description);
     }
 
 }

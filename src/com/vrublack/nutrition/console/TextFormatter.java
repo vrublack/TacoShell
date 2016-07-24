@@ -113,19 +113,15 @@ public class TextFormatter extends Formatter
     public String format(DirectSpecification specification)
     {
         List<String> comps = new ArrayList<>();
-        if (specification.isCaloriesSpecified())
-            comps.add(specification.getCalories() + " Calories");
 
-        NutrientQuantity carbs = specification.getNutrient(Specification.NutrientType.Carbohydrates);
-        NutrientQuantity fat = specification.getNutrient(Specification.NutrientType.Fat);
-        NutrientQuantity protein = specification.getNutrient(Specification.NutrientType.Protein);
-
-        if (carbs != null)
-            comps.add(format(carbs.getAmountInUnit()) + "g carbs");
-        if (fat != null)
-            comps.add(format(fat.getAmountInUnit()) + "g fat");
-        if (protein != null)
-            comps.add(format(protein.getAmountInUnit()) + "g protein");
+        for (Specification.NutrientType type : Specification.NutrientType.values())
+        {
+            NutrientQuantity quantity;
+            if ((quantity = specification.getNutrient(type)) != null)
+            {
+                comps.add(format(quantity.getAmountInUnit()) + format(quantity.getUnit()) + " " + type);
+            }
+        }
 
         String result = "";
         for (int i = 0; i < comps.size(); i++)
