@@ -77,18 +77,19 @@ public class DirectInputExpressionParser
                 {
                     if (unit != null)
                         throw new ParseException("A unit for calories isn't allowed!");
-                    else if (directSpecification.isNutrientSpecified())
-                        throw new ParseException("You can't specify calories and nutrients at the same time.");
                     else
                         directSpecification.setCalories(quantifier);
                 } else
                 {
-                    if (directSpecification.isCaloriesSpecified())
-                        throw new ParseException("You can't specify calories and nutrients at the same time.");
                     if (unit == null)
                         unit = NutrientQuantity.Unit.g;     // grams is implicit unit
 
                     directSpecification.putNutrient(type, unit, quantifier);
+
+                    // add to super-category as well
+                    Specification.NutrientType supercategory = Specification.getSuperCategory(type);
+                    if (supercategory != null)
+                        directSpecification.putNutrient(supercategory, unit, quantifier);
                 }
             }
 

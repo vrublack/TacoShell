@@ -4,7 +4,9 @@ import com.google.gwt.user.client.rpc.IsSerializable;
 
 import java.io.Serializable;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Represents a specific amount of foodItem
@@ -40,6 +42,9 @@ public abstract class Specification implements IsSerializable, Serializable
         Kcal    // often not used
     }
 
+    /**
+     * Aliases for Nutrient Types
+     */
     private static final Map<NutrientType, String[]> aliases = new HashMap<>();
 
     static
@@ -63,6 +68,22 @@ public abstract class Specification implements IsSerializable, Serializable
         aliases.put(NutrientType.Kcal, new String[]{"calories", "calorie", "cal", "cals", "kcals"});
     }
 
+    /**
+     * Supercategories for Nutrient Types (eg., Fat is a supercategory of FatSaturated)
+     */
+    private static final Map<NutrientType, NutrientType> supercategories = new HashMap<>();
+
+    static
+    {
+        supercategories.put(NutrientType.FatTrans, NutrientType.Fat);
+        supercategories.put(NutrientType.FatPolyunsaturated, NutrientType.Fat);
+        supercategories.put(NutrientType.FatMonounsaturated, NutrientType.Fat);
+        supercategories.put(NutrientType.FatSaturated, NutrientType.Fat);
+
+        supercategories.put(NutrientType.Sugar, NutrientType.Carbohydrates);
+
+        // technically, kcal is a supercategory of everything, but they don't translate 1:1 so we'll omit them (1 g carbs isn't 1 kcal)
+    }
 
     /**
      * @return If the nutrientType is counted as a macro nutrient
@@ -97,6 +118,20 @@ public abstract class Specification implements IsSerializable, Serializable
         }
 
         return null;
+    }
+
+    /**
+     *
+     * @param type Sub-category
+     * @return Supercategory of type, eg. Carbohydrates would be a super-category of Sugar. <code>null</code> if there
+     * is no such super-category
+     */
+    public static NutrientType getSuperCategory(NutrientType type)
+    {
+        if (supercategories.containsKey(type))
+            return supercategories.get(type);
+        else
+            return null;
     }
 
     public abstract String getId();
