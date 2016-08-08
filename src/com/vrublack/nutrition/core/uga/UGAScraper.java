@@ -138,7 +138,7 @@ public class UGAScraper
                 if (unitStart == -1)
                     unit = "pieces";
                 else
-                    unit = servingSize.substring(unitStart);
+                    unit = servingSize.substring(unitStart).toLowerCase();
 
                 // TODO fractions ("1/4") can also occur
                 String quantifierStr = servingSize.substring(0, unitStart);
