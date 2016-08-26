@@ -70,37 +70,20 @@ public class UGAFoodItem extends SearchableFoodItem implements Serializable
 
     private DescriptionComp[] parseDescriptionComps(String description)
     {
-        String[] strComps = description.split(",");
+        // Simpler implementation than for USDA description comps for the following reasons:
+        // 1. There are fewer food items from the UGA source than from the USDA source, so it's not as crucial
+        // to distinguish the position of the comp.
+        // 2. Descriptions used by UGA are in a less strict format, which makes a more intelligent processing more difficult.
+        String[] strComps = description.split("[, ()]");
         List<DescriptionComp> descriptionComps = new ArrayList<>();
         for (String strComp : strComps)
         {
             strComp = strComp.trim();
 
-            // The component can be something like "wheat flour". In this case, the component should be split
-            // further into two subcomponents (for search) and the order should be reversed, as the last part
-            // is more important most of the time
-            if (countOccurrences(strComp, ' ') == 1)
-            {
-                String[] subComps = strComp.split(" ");
-                if (subComps.length == 2)
-                {
-                    DescriptionComp descriptionComp = new DescriptionComp();
-                    descriptionComp.comp = subComps[1]; // reverse order
-                    descriptionComp.priority = descriptionComps.size() + 1;
-                    descriptionComps.add(descriptionComp);
-                }
-
-                DescriptionComp descriptionComp = new DescriptionComp();
-                descriptionComp.comp = subComps[0];
-                descriptionComp.priority = descriptionComps.size() + 1;
-                descriptionComps.add(descriptionComp);
-            } else
-            {
-                DescriptionComp descriptionComp = new DescriptionComp();
-                descriptionComp.comp = strComp;
-                descriptionComp.priority = descriptionComps.size() + 1;
-                descriptionComps.add(descriptionComp);
-            }
+            DescriptionComp descriptionComp = new DescriptionComp();
+            descriptionComp.comp = strComp; // reverse order
+            descriptionComp.priority = descriptionComps.size() + 1;
+            descriptionComps.add(descriptionComp);
         }
 
         return descriptionComps.toArray(new DescriptionComp[descriptionComps.size()]);
