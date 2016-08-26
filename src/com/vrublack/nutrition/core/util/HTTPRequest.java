@@ -14,7 +14,7 @@ public class HTTPRequest
     /**
      * Timeout in miliseconds
      */
-    private static int TIMEOUT = 10000;
+    private static int TIMEOUT = 100000;
 
     public static String executeGet(String baseUrl, String path, NameValuePair[] parameters) throws URISyntaxException, IOException
     {

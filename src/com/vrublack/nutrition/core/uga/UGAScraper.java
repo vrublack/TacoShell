@@ -4,6 +4,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonSyntaxException;
 import com.vrublack.nutrition.core.*;
+import com.vrublack.nutrition.core.util.Debug;
 import com.vrublack.nutrition.core.util.HTTPRequest;
 
 import java.io.IOException;
@@ -90,9 +91,11 @@ public class UGAScraper
 
     private static List<UGAFoodItem> scrapeLocation(String baseUrl, String diningHall)
     {
+        String content = null;
+
         try
         {
-            String content = HTTPRequest.executeGet(baseUrl, diningHall.replace(" ", "-"), new HTTPRequest.NameValuePair[]{});
+            content = HTTPRequest.executeGet(baseUrl, diningHall.replace(" ", "-"), new HTTPRequest.NameValuePair[]{});
 
             // parse content
 
@@ -101,119 +104,125 @@ public class UGAScraper
 
             while ((currentPos = content.indexOf("data-nutrition", currentPos)) != -1)
             {
-                int startInfo = content.indexOf("\"{", currentPos);
-                int endInfo = content.indexOf("}\"", startInfo + 1);
-
-                String data = content.substring(startInfo + 1, endInfo + 1);
-                data = data.replace("&quot;", "\"");
-
-                JsonObject json;
                 try
                 {
-                    // nutrition data is in JSON-format
-                    json = new JsonParser().parse(data).getAsJsonObject();
-                } catch (JsonSyntaxException e)
-                {
-                    e.printStackTrace();
-                    continue;
-                }
+                    int startInfo = content.indexOf("\"{", currentPos);
+                    int endInfo = content.indexOf("}\"", startInfo + 1);
 
-                float kcal = json.get("calories").getAsFloat();
-                String name = json.get("serving-name").getAsString();
-                String servingSize = json.get("serving-size").getAsString();
+                    String data = content.substring(startInfo + 1, endInfo + 1);
+                    data = data.replace("&quot;", "\"");
 
-                // separate quantifier and unit in servingSize
-                int unitStart = -1;
-                for (int i = 0; i < servingSize.length(); i++)
-                {
-                    char c = servingSize.charAt(i);
-                    if (c >= 'a' && c <= 'z' || c >= 'A' && c <= 'Z')
+                    JsonObject json;
+                    try
                     {
-                        unitStart = i;
-                        break;
+                        // nutrition data is in JSON-format
+                        json = new JsonParser().parse(data).getAsJsonObject();
+                    } catch (JsonSyntaxException e)
+                    {
+                        e.printStackTrace();
+                        continue;
                     }
-                }
 
-                String unit;
-                if (unitStart == -1)
-                    unit = "pieces";
-                else
-                    unit = servingSize.substring(unitStart).toLowerCase();
+                    float kcal = json.get("calories").getAsFloat();
+                    String name = json.get("serving-name").getAsString();
+                    String servingSize = json.get("serving-size").getAsString();
 
-                // TODO fractions ("1/4") can also occur
-                String quantifierStr = servingSize.substring(0, unitStart);
-                float quantifier;
-                try
-                {
-                    if (quantifierStr.contains("/")) // fraction
-
+                    // separate quantifier and unit in servingSize
+                    int unitStart = -1;
+                    for (int i = 0; i < servingSize.length(); i++)
                     {
-                        quantifier = 0;
-
-                        if (quantifierStr.trim().contains(" "))     // something like "3 1/2" (three and a halve)
+                        char c = servingSize.charAt(i);
+                        if (c >= 'a' && c <= 'z' || c >= 'A' && c <= 'Z')
                         {
-                            quantifier = Float.parseFloat(quantifierStr.substring(0, quantifierStr.indexOf(' ')));
-                            quantifierStr = quantifierStr.substring(quantifierStr.indexOf(' ') + 1);
+                            unitStart = i;
+                            break;
                         }
-
-                        float numer = Float.parseFloat(quantifierStr.substring(0, quantifierStr.indexOf('/')));
-                        float denom = Float.parseFloat(quantifierStr.substring(quantifierStr.indexOf('/') + 1));
-                        quantifier += numer / denom;
-                    } else
-                    {
-                        quantifier = Float.parseFloat(quantifierStr);
                     }
+
+                    String unit;
+                    if (unitStart == -1)
+                        unit = "pieces";
+                    else
+                        unit = servingSize.substring(unitStart).toLowerCase();
+
+                    // TODO fractions ("1/4") can also occur
+                    String quantifierStr = servingSize.substring(0, unitStart);
+                    float quantifier;
+                    try
+                    {
+                        if (quantifierStr.contains("/")) // fraction
+
+                        {
+                            quantifier = 0;
+
+                            if (quantifierStr.trim().contains(" "))     // something like "3 1/2" (three and a halve)
+                            {
+                                quantifier = Float.parseFloat(quantifierStr.substring(0, quantifierStr.indexOf(' ')));
+                                quantifierStr = quantifierStr.substring(quantifierStr.indexOf(' ') + 1);
+                            }
+
+                            float numer = Float.parseFloat(quantifierStr.substring(0, quantifierStr.indexOf('/')));
+                            float denom = Float.parseFloat(quantifierStr.substring(quantifierStr.indexOf('/') + 1));
+                            quantifier += numer / denom;
+                        } else
+                        {
+                            quantifier = Float.parseFloat(quantifierStr);
+                        }
+                    } catch (NumberFormatException e)
+                    {
+                        e.printStackTrace();
+                        continue;
+                    }
+
+                    Map<Specification.NutrientType, NutrientQuantity> nutrients = new HashMap<>();
+
+                    NutrientKeyValue[] nutrientsKeyValue = {
+                            p("total-fat", Specification.NutrientType.Fat),
+                            p("sat-fat", Specification.NutrientType.FatSaturated),
+                            p("trans-fat", Specification.NutrientType.FatTrans),
+                            p("cholesterol", Specification.NutrientType.Cholesterol),
+                            p("sodium", Specification.NutrientType.Sodium),
+                            p("total-carb", Specification.NutrientType.Carbohydrates),
+                            p("dietary-fiber", Specification.NutrientType.Fiber),
+                            p("sugars", Specification.NutrientType.Sugar),
+                            p("protein", Specification.NutrientType.Protein),
+                    };
+
+                    for (NutrientKeyValue kv : nutrientsKeyValue)
+                    {
+                        if (json.has(kv.first))
+                        {
+                            try
+                            {
+                                String value = json.get(kv.first).getAsString();
+                                if (!value.trim().isEmpty())
+                                    nutrients.put(kv.second, NutrientQuantity.parseFromString(value));
+                            } catch (ParseException e)
+                            {
+                                e.printStackTrace();
+                            }
+                        }
+                    }
+
+                    UGAFoodItem item = new UGAFoodItem(name, new FoodQuantity(quantifier, unit, unit), kcal, nutrients);
+                    item.addLocation(diningHall);
+                    items.add(item);
+
                 } catch (NumberFormatException e)
                 {
-                    e.printStackTrace();
-                    continue;
+                    System.err.println("Skipped food item");
                 }
-
-                Map<Specification.NutrientType, NutrientQuantity> nutrients = new HashMap<>();
-
-                NutrientKeyValue[] nutrientsKeyValue = {
-                        p("total-fat", Specification.NutrientType.Fat),
-                        p("sat-fat", Specification.NutrientType.FatSaturated),
-                        p("trans-fat", Specification.NutrientType.FatTrans),
-                        p("cholesterol", Specification.NutrientType.Cholesterol),
-                        p("sodium", Specification.NutrientType.Sodium),
-                        p("total-carb", Specification.NutrientType.Carbohydrates),
-                        p("dietary-fiber", Specification.NutrientType.Fiber),
-                        p("sugars", Specification.NutrientType.Sugar),
-                        p("protein", Specification.NutrientType.Protein),
-                };
-
-                for (NutrientKeyValue kv : nutrientsKeyValue)
-                {
-                    if (json.has(kv.first))
-                    {
-                        try
-                        {
-                            String value = json.get(kv.first).getAsString();
-                            if (!value.trim().isEmpty())
-                                nutrients.put(kv.second, NutrientQuantity.parseFromString(value));
-                        } catch (ParseException e)
-                        {
-                            e.printStackTrace();
-                        }
-                    }
-                }
-
-                UGAFoodItem item = new UGAFoodItem(name, new FoodQuantity(quantifier, unit, unit), kcal, nutrients);
-                item.addLocation(diningHall);
-                items.add(item);
 
                 currentPos++;
             }
 
             return items;
 
-        } catch (URISyntaxException e)
+        } catch (URISyntaxException | IOException e)
         {
             e.printStackTrace();
-        } catch (IOException e)
-        {
-            e.printStackTrace();
+
+            // Debug.writeToFile("uga_page.html", content);
         }
 
         return new ArrayList<>();
