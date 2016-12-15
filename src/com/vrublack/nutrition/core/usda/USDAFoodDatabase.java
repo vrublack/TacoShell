@@ -146,18 +146,15 @@ public abstract class USDAFoodDatabase implements SyncFoodDataSource
             if (countOccurrences(strComp, ' ') == 1)
             {
                 String[] subComps = strComp.split(" ");
-                if (subComps.length == 2)
+
+                for (int i = subComps.length - 1; i >= 0; i--)
                 {
                     USDAFoodItem.DescriptionComp descriptionComp = new USDAFoodItem.DescriptionComp();
-                    descriptionComp.comp = subComps[1]; // reverse order
+                    descriptionComp.comp = subComps[i];
                     descriptionComp.priority = descriptionComps.size() + 1;
                     descriptionComps.add(descriptionComp);
                 }
 
-                USDAFoodItem.DescriptionComp descriptionComp = new USDAFoodItem.DescriptionComp();
-                descriptionComp.comp = subComps[0];
-                descriptionComp.priority = descriptionComps.size() + 1;
-                descriptionComps.add(descriptionComp);
             } else
             {
                 USDAFoodItem.DescriptionComp descriptionComp = new USDAFoodItem.DescriptionComp();

@@ -155,21 +155,17 @@ public abstract class UserFoodDatabase implements SyncFoodDataSource
             // The component can be something like "wheat flour". In this case, the component should be split
             // further into two subcomponents (for search) and the order should be reversed, as the last part
             // is more important most of the time
-            if (countOccurrences(strComp, ' ') == 1)
+            if (countOccurrences(strComp, ' ') >= 1)
             {
                 String[] subComps = strComp.split(" ");
-                if (subComps.length == 2)
+
+                for (int i = subComps.length - 1; i >= 0; i--)
                 {
                     UserFoodItem.DescriptionComp descriptionComp = new UserFoodItem.DescriptionComp();
-                    descriptionComp.comp = subComps[1]; // reverse order
+                    descriptionComp.comp = subComps[i];
                     descriptionComp.priority = descriptionComps.size() + 1;
                     descriptionComps.add(descriptionComp);
                 }
-
-                UserFoodItem.DescriptionComp descriptionComp = new UserFoodItem.DescriptionComp();
-                descriptionComp.comp = subComps[0];
-                descriptionComp.priority = descriptionComps.size() + 1;
-                descriptionComps.add(descriptionComp);
             } else
             {
                 UserFoodItem.DescriptionComp descriptionComp = new UserFoodItem.DescriptionComp();
