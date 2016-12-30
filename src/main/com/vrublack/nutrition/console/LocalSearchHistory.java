@@ -1,10 +1,12 @@
 package com.vrublack.nutrition.console;
 
+import com.vrublack.nutrition.core.Pair;
 import com.vrublack.nutrition.core.SearchHistory;
 import com.vrublack.nutrition.core.SearchStringStat;
 
 import java.io.*;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Stores/retrieves search feedback from local file
@@ -108,5 +110,20 @@ public class LocalSearchHistory implements SearchHistory
         };
 
         t.start();
+    }
+
+    /**
+     *
+     * @return List of pairs (query, most commond id for that query)
+     */
+    public List<Pair<String, String>> getQueryIdPairs()
+    {
+        List<Pair<String, String>> pairs = new ArrayList<>();
+        for (SearchStringStat stat : stats)
+        {
+            pairs.add(new Pair<>(stat.getSearchString(), stat.getMostCommonPair().first));
+        }
+
+        return pairs;
     }
 }

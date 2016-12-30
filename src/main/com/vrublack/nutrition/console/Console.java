@@ -725,7 +725,7 @@ public class Console
         for (int i = 0; i < entryLimit; i++)
         {
             float scaledPopularity = 100 * percentileScale.getPercentile(results.get(i).getRelativePopularity());
-            matrix.setRow(i + 1, new String[]{"[" + (i + 1) + "]", results.get(i).getDescription(), formatter.formatPopularity(scaledPopularity)});
+            matrix.setRow(i + 1, new String[]{"[" + (i + 1) + "]", results.get(i).toString(), formatter.formatPopularity(scaledPopularity)});
         }
         String[] formattedLines = matrix.formatToLines();
 
@@ -853,7 +853,7 @@ public class Console
         for (int i = 0; i < entryLimit; i++)
         {
             float scaledPopularity = 100 * percentileScale.getPercentile(results.get(i).getRelativePopularity());
-            matrix.setRow(i + 1, new String[]{"[" + (i + 1) + "]", results.get(i).getDescription(), formatter.formatPopularity(scaledPopularity)});
+            matrix.setRow(i + 1, new String[]{"[" + (i + 1) + "]", results.get(i).toString(), formatter.formatPopularity(scaledPopularity)});
         }
         String[] formattedLines = matrix.formatToLines();
 

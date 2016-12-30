@@ -1,6 +1,8 @@
 package com.vrublack.nutrition.core;
 
 
+import com.Config;
+
 import java.io.Serializable;
 
 public abstract class FoodItem implements Serializable
@@ -48,6 +50,9 @@ public abstract class FoodItem implements Serializable
     @Override
     public String toString()
     {
-        return getDescription();
+        if (Config.DEBUG)
+            return getId() + " | " + getDescription();
+        else
+            return getDescription();
     }
 }

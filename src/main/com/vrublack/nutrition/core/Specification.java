@@ -151,5 +151,11 @@ public abstract class Specification implements IsSerializable, Serializable
     public abstract String getDescription();
 
     public abstract FoodQuantity getAmount();
+
+    @Override
+    public String toString()
+    {
+        return getDescription();
+    }
 }
 

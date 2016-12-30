@@ -1,7 +1,9 @@
 package com.vrublack.nutrition.core;
 
 
+import com.Config;
 import com.google.gwt.user.client.rpc.IsSerializable;
+import com.vrublack.nutrition.core.util.Debug;
 
 import java.io.Serializable;
 
@@ -90,5 +92,32 @@ public class SearchResultItem implements IsSerializable, Serializable
     public float getSearchScore()
     {
         return searchScore;
+    }
+
+    @Override
+    public String toString()
+    {
+        if (Config.DEBUG)
+            return getId() + " | " + getDescription();
+        else
+            return getDescription();
+    }
+
+    @Override
+    public boolean equals(Object o)
+    {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        SearchResultItem that = (SearchResultItem) o;
+
+        return id != null ? id.equals(that.id) : that.id == null;
+
+    }
+
+    @Override
+    public int hashCode()
+    {
+        return id != null ? id.hashCode() : 0;
     }
 }

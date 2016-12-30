@@ -137,7 +137,7 @@ public class TextFormatter extends Formatter
     @Override
     public String format(FoodSpecification specification)
     {
-        return specification.getFoodItem().getDescription() + " (" + format(specification.getQuantity()) + ")";
+        return specification.getFoodItem() + " (" + format(specification.getQuantity()) + ")";
     }
 
     @Override
@@ -190,7 +190,7 @@ public class TextFormatter extends Formatter
                 time = dateFormat.format(RecordManager.getCalendar(dailyRecord.getAddedDate(i)).getTime()) + "h";
 
 
-            String description = entry.getDescription();
+            String description = entry.toString();
             String amount = format(entry.getAmount());
 
             final int wrapDescriptionAfter = 45;
@@ -310,7 +310,7 @@ public class TextFormatter extends Formatter
             Specification entry = daySpecifications.get(daySpecifications.size() - i - 1);
 
             List<String> newRow = new ArrayList<>();
-            newRow.add(entry.getDescription());
+            newRow.add(entry.toString());
             newRow.add(format(entry.getCalories()));
             for (int i1 = 0; i1 < shownNutrients.size(); i1++)
             {

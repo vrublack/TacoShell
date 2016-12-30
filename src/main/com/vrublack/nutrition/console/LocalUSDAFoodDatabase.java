@@ -1,5 +1,6 @@
 package com.vrublack.nutrition.console;
 
+import com.vrublack.nutrition.core.DummySearchHistory;
 import com.vrublack.nutrition.core.SearchHistory;
 import com.vrublack.nutrition.core.usda.USDAFoodDatabase;
 
@@ -12,10 +13,22 @@ public class LocalUSDAFoodDatabase extends USDAFoodDatabase
 {
     private final static String FILENAME = "ABBREV_CUST.txt";
 
-    private SearchHistory searchHistory = new LocalSearchHistory();
+    private SearchHistory searchHistory;
 
     public LocalUSDAFoodDatabase()
     {
+        searchHistory = new LocalSearchHistory();
+
+        // parent constructor loads ascii file
+    }
+
+    public LocalUSDAFoodDatabase(boolean useSearchHistory)
+    {
+        if (useSearchHistory)
+            searchHistory = new LocalSearchHistory();
+        else
+            searchHistory = new DummySearchHistory();
+
         // parent constructor loads ascii file
     }
 

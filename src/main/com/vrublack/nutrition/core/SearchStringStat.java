@@ -89,4 +89,10 @@ public class SearchStringStat implements Serializable
 
         return highestPair;
     }
+
+    @Override
+    public String toString()
+    {
+        return searchString;
+    }
 }
