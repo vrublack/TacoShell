@@ -2,6 +2,7 @@ package com.vrublack.nutrition.core;
 
 
 import com.google.gwt.user.client.rpc.IsSerializable;
+import com.vrublack.nutrition.core.FoodItem;
 
 import java.io.Serializable;
 
@@ -10,10 +11,21 @@ import java.io.Serializable;
  */
 public abstract class SearchableFoodItem extends FoodItem
 {
+    private final static long serialVersionUID = 1549735218364873535L;
+
     /**
      * @return Components that should be searched
      */
     public abstract DescriptionComp[] getDescriptionComps();
+
+    public int getPriorityForComp(String compName)
+    {
+        for (DescriptionComp comp : getDescriptionComps())
+            if (comp.comp.equals(compName))
+                return comp.priority;
+
+        return 0;
+    }
 
     /**
      * @return A summary description of key nutritional values for a nominated serving size,
@@ -28,5 +40,23 @@ public abstract class SearchableFoodItem extends FoodItem
         public String comp;
         // priority with 1 being the highest and infinity being the lowest
         public int priority;
+
+        @Override
+        public boolean equals(Object o)
+        {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+
+            DescriptionComp that = (DescriptionComp) o;
+
+            return comp != null ? comp.equals(that.comp) : that.comp == null;
+
+        }
+
+        @Override
+        public int hashCode()
+        {
+            return comp != null ? comp.hashCode() : 0;
+        }
     }
 }

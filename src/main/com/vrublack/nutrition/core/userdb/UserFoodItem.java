@@ -2,6 +2,7 @@ package com.vrublack.nutrition.core.userdb;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
 import com.vrublack.nutrition.core.*;
+import com.vrublack.nutrition.core.SearchableFoodItem;
 
 import java.io.Serializable;
 import java.util.Map;

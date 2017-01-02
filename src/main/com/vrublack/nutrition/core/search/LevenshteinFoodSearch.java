@@ -1,4 +1,8 @@
-package com.vrublack.nutrition.core;
+package com.vrublack.nutrition.core.search;
+
+import com.vrublack.nutrition.core.SearchHistory;
+import com.vrublack.nutrition.core.SearchResultItem;
+import com.vrublack.nutrition.core.SearchableFoodItem;
 
 import java.io.Serializable;
 import java.util.*;
@@ -6,11 +10,22 @@ import java.util.*;
 /**
  * Searches foodItem in a list of food items, using the design pattern "visitor"
  */
-public class FoodSearch
+public class LevenshteinFoodSearch implements FoodSearch
 {
     private final static float[] searchCompFactor = {1f, 0.7f, 0.6f, 0.5f, 0.4f, 0.3f};
 
-    public List<SearchResultItem> searchFood(String searchString, List<SearchableFoodItem> entries, SearchHistory searchHistory)
+    private List<SearchableFoodItem> entries;
+
+    private SearchHistory searchHistory;
+
+
+    public LevenshteinFoodSearch(List<SearchableFoodItem> entries, SearchHistory searchHistory)
+    {
+        this.entries = entries;
+        this.searchHistory = searchHistory;
+    }
+
+    public List<SearchResultItem> searchFood(String searchString)
     {
         String ndbNumber = null;
         if (searchHistory != null)
@@ -33,18 +48,14 @@ public class FoodSearch
             }
         }
 
-        Collections.sort(matches, new Comparator<InternalResultItem>()
+        Collections.sort(matches, (o1, o2) ->
         {
-            @Override
-            public int compare(InternalResultItem o1, InternalResultItem o2)
-            {
-                if (o1.score == o2.score)
-                    return 0;
-                else if (o1.score < o2.score)
-                    return 1;
-                else
-                    return -1;
-            }
+            if (o1.score == o2.score)
+                return 0;
+            else if (o1.score < o2.score)
+                return 1;
+            else
+                return -1;
         });
 
         return strip(matches);

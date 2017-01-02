@@ -3,8 +3,11 @@ package com.vrublack.nutrition;
 
 import com.vrublack.nutrition.console.LocalSearchHistory;
 import com.vrublack.nutrition.console.LocalUSDAFoodDatabase;
+import com.vrublack.nutrition.core.search.LevenshteinFoodSearch;
 import com.vrublack.nutrition.core.Pair;
 import com.vrublack.nutrition.core.SearchResultItem;
+import com.vrublack.nutrition.core.search.HashFoodSearch;
+import com.vrublack.nutrition.core.search.FoodSearch;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -16,10 +19,10 @@ public class SearchEvaluation
 
     private LocalUSDAFoodDatabase db = new LocalUSDAFoodDatabase(false);    // don't use search history
 
-    public float evaluateWithHistory()
+    public void evaluateWithHistory()
     {
         System.out.println("--EVALUATING WITH HISTORY--");
-        return evaluatePairs(hist.getQueryIdPairs());
+        evaluatePairs(hist.getQueryIdPairs());
     }
 
     private List<Pair<String, String>> loadPairs(String filename)
@@ -47,36 +50,58 @@ public class SearchEvaluation
         return pairs;
     }
 
-    public float evaluateWithCustomPairs()
+    public void evaluateWithCustomPairs()
     {
         List<Pair<String, String>> pairs = loadPairs("src/test/resources/search_pairs.csv");
         System.out.println("--EVALUATING WITH CUSTOM PAIRS--");
-        return evaluatePairs(pairs);
+        evaluatePairs(pairs);
     }
 
-    private float evaluatePairs(List<Pair<String, String>> queryIdPairs)
+    private void evaluatePairs(List<Pair<String, String>> queryIdPairs)
     {
-        float score = 0;
+        float levenshteinScore = 0;
+        float stemScore = 0;
+        long levenshteinTime = 0;
+        long stemTime = 0;
+        int count = 0;
+
+        FoodSearch levenshteinSearch = new LevenshteinFoodSearch(db.getSearchableFoodItems(), null);
+        FoodSearch stemSearch = new HashFoodSearch(db.getCanonicalSearchableFoodItems(), null);
+
         for (int i = 0; i < queryIdPairs.size(); i++)
         {
             Pair<String, String> pair = queryIdPairs.get(i);
             if (Character.isDigit(pair.second.charAt(0)))   // disregard user food items
             {
-                float result = evaluateSearch(pair.first, pair.second);
-                result = Math.min(result, 20);
-                score += result;
-                System.out.println("Evaluated " + i + " out " + queryIdPairs.size() + " with score " + result);
+                count++;
+
+                long start = System.nanoTime();
+                float levenshteinResult = evaluateSearch(pair.first, pair.second, levenshteinSearch);
+                levenshteinTime += System.nanoTime() - start;
+                start = System.nanoTime();
+                float stemResult = evaluateSearch(pair.first, pair.second, stemSearch);
+                stemTime += System.nanoTime() - start;
+                levenshteinResult = Math.min(levenshteinResult, 20);
+                stemResult = Math.min(stemResult, 20);
+
+                if (levenshteinResult < stemResult)
+                    System.out.printf("Worse result (%.1f != %.1f)\n", levenshteinResult, stemResult);
+
+                levenshteinScore += levenshteinResult;
+                stemScore += stemResult;
+                // System.out.println("Evaluated " + i + " out " + queryIdPairs.size() + " with score " + result);
             }
         }
 
-        return score;
+        System.out.printf("levenshtein: %.1f, stem: %.1f\n\n", levenshteinScore, stemScore);
+        System.out.printf("levenshtein avg time: %.1f ms, stem avg time: %.1f ms\n",
+                levenshteinTime / (float) count / 1000000, stemTime / (float) count / 1000000);
     }
 
-    private float evaluateSearch(String searchStr, String expectedId)
+    private float evaluateSearch(String searchStr, String expectedId, FoodSearch search)
     {
-        List<SearchResultItem> results = db.search(searchStr);
+        List<SearchResultItem> results = db.search(searchStr, search);
         int index = results.indexOf(new SearchResultItem(expectedId, null, null, -1, -1));
-        float error;
         if (index == -1)
             return Float.POSITIVE_INFINITY;
         else
@@ -86,9 +111,7 @@ public class SearchEvaluation
     public static void main(String[] args)
     {
         SearchEvaluation eval = new SearchEvaluation();
-        float customScore = eval.evaluateWithCustomPairs();
-        float historyScore = eval.evaluateWithHistory();
-
-        System.out.printf("Custom score: %.1f, history score: %.1f", customScore, historyScore);
+        // eval.evaluateWithCustomPairs();
+        eval.evaluateWithHistory();
     }
 }

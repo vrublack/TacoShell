@@ -1,6 +1,7 @@
 package com.vrublack.nutrition.console;
 
 
+import com.Config;
 import com.vrublack.nutrition.core.*;
 import com.vrublack.nutrition.core.Formatter;
 import com.vrublack.nutrition.core.fatsecret.FatsecretAPI;
@@ -40,7 +41,7 @@ public class Console
             System.out.println("Invalid number of arguments. You can specify the food source by \"usda\" or \"fatsecret\"");
 
         if (console.dataSource == null)
-            console.dataSource = new LocalUSDAFoodDatabase();
+            console.dataSource = new LocalUSDAFoodDatabase(!Config.DEBUG);
 
 
         console.formatter = readIniFile();
@@ -512,7 +513,7 @@ public class Console
                 System.out.println("Data source switched to FatSecret API");
                 break;
             case "usda":
-                dataSource = new LocalUSDAFoodDatabase();
+                dataSource = new LocalUSDAFoodDatabase(!Config.DEBUG);
                 System.out.println("Data source switched to USDA Database");
                 break;
             case "uga":

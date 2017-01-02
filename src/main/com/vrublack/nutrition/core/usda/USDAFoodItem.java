@@ -2,6 +2,7 @@ package com.vrublack.nutrition.core.usda;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
 import com.vrublack.nutrition.core.*;
+import com.vrublack.nutrition.core.CanonicalSearchableFoodItem;
 
 import java.io.Serializable;
 import java.util.Map;
@@ -9,13 +10,14 @@ import java.util.Map;
 /**
  * Represents specific foodItem in a USDAFoodDatabase
  */
-public class USDAFoodItem extends SearchableFoodItem implements IsSerializable, Serializable
+public class USDAFoodItem extends CanonicalSearchableFoodItem implements IsSerializable, Serializable
 {
     private static final long serialVersionUID = 14235;
 
     private String id;
     private String description;
     private DescriptionComp[] descriptionComps;
+    private DescriptionComp[] canonicalDescriptionComps;
     private float kcal;
     private int popularity;
 
@@ -31,15 +33,17 @@ public class USDAFoodItem extends SearchableFoodItem implements IsSerializable, 
     private UnitConverter.ConversionDefinition[] conversionDefs;
 
     /**
-     * @param id               NDB number
-     * @param description      String that describes foodItem item
-     * @param descriptionComps Components in the description, e.g. "UNCOOKED OIL,OLIVE" -> {"oil", "olive", "uncooked"}
-     * @param nutrients        Nutrients
-     * @param kcal             Kcal per 100g
-     * @param popularity       How often the foodItem is consumed. The higher the number the more often the foodItem is consumed.
-     * @param commonMeasures   Common measures for this foodItem item
+     * @param id                        NDB number
+     * @param description               String that describes foodItem item
+     * @param descriptionComps          Components in the description, e.g. "UNCOOKED OIL,OLIVE" -> {"oil", "olive", "uncooked"}
+     * @param canonicalDescriptionComps Description comps in canonical form
+     * @param nutrients                 Nutrients
+     * @param kcal                      Kcal per 100g
+     * @param popularity                How often the foodItem is consumed. The higher the number the more often the foodItem is consumed.
+     * @param commonMeasures            Common measures for this foodItem item
      */
-    public USDAFoodItem(String id, String description, DescriptionComp[] descriptionComps, Map<Specification.NutrientType, NutrientQuantity> nutrients, float kcal, int popularity,
+    public USDAFoodItem(String id, String description, DescriptionComp[] descriptionComps, DescriptionComp[] canonicalDescriptionComps,
+                        Map<Specification.NutrientType, NutrientQuantity> nutrients, float kcal, int popularity,
                         CommonMeasure[] commonMeasures)
     {
         this.nutrients = nutrients;
@@ -47,6 +51,7 @@ public class USDAFoodItem extends SearchableFoodItem implements IsSerializable, 
         this.id = id;
         this.description = description;
         this.descriptionComps = descriptionComps;
+        this.canonicalDescriptionComps = canonicalDescriptionComps;
         this.kcal = kcal;
         this.popularity = popularity;
 
@@ -85,6 +90,12 @@ public class USDAFoodItem extends SearchableFoodItem implements IsSerializable, 
     public DescriptionComp[] getDescriptionComps()
     {
         return descriptionComps;
+    }
+
+    @Override
+    public DescriptionComp[] getCanonicalDescriptionComps()
+    {
+        return canonicalDescriptionComps;
     }
 
     @Override

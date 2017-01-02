@@ -2,6 +2,9 @@ package com.vrublack.nutrition.core.userdb;
 
 
 import com.vrublack.nutrition.core.*;
+import com.vrublack.nutrition.core.search.FoodSearch;
+import com.vrublack.nutrition.core.search.LevenshteinFoodSearch;
+import com.vrublack.nutrition.core.SearchableFoodItem;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -18,6 +21,9 @@ public abstract class UserFoodDatabase implements SyncFoodDataSource
     // search history that is being used in search
     private SearchHistory searchHistory = new DummySearchHistory();
     private String lastSearchStr;
+
+    private FoodSearch foodSearch;
+
 
     private static transient final int LINE_MIN_LENGTH = 26;
 
@@ -78,6 +84,8 @@ public abstract class UserFoodDatabase implements SyncFoodDataSource
     public UserFoodDatabase()
     {
         parseAsciiFile();
+
+        foodSearch = new LevenshteinFoodSearch(getSearchableFoodItems(), new DummySearchHistory());
     }
 
     /**
@@ -281,11 +289,7 @@ public abstract class UserFoodDatabase implements SyncFoodDataSource
     @Override
     public List<SearchResultItem> search(String searchStr)
     {
-        lastSearchStr = searchStr;
-        FoodSearch foodSearch = new FoodSearch();
-        List<SearchableFoodItem> searchableFoodItems = new ArrayList<>();
-        searchableFoodItems.addAll(entries);
-        return foodSearch.searchFood(searchStr, searchableFoodItems, searchHistory);
+        return foodSearch.searchFood(searchStr);
     }
 
     @Override
@@ -315,5 +319,12 @@ public abstract class UserFoodDatabase implements SyncFoodDataSource
                 return foodItem;
             }
         return null;
+    }
+
+    public List<SearchableFoodItem> getSearchableFoodItems()
+    {
+        List<SearchableFoodItem> searchableFoodItems = new ArrayList<>();
+        searchableFoodItems.addAll(entries);
+        return searchableFoodItems;
     }
 }

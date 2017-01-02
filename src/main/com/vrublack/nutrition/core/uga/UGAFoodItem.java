@@ -1,7 +1,7 @@
 package com.vrublack.nutrition.core.uga;
 
-import com.sun.istack.internal.Nullable;
 import com.vrublack.nutrition.core.*;
+import com.vrublack.nutrition.core.SearchableFoodItem;
 
 import java.io.Serializable;
 import java.util.*;

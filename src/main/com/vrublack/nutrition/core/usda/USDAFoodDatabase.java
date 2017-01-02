@@ -1,6 +1,10 @@
 package com.vrublack.nutrition.core.usda;
 
 import com.vrublack.nutrition.core.*;
+import com.vrublack.nutrition.core.CanonicalSearchableFoodItem;
+import com.vrublack.nutrition.core.search.FoodSearch;
+import com.vrublack.nutrition.core.search.HashFoodSearch;
+import com.vrublack.nutrition.core.SearchableFoodItem;
 
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
@@ -19,13 +23,18 @@ public abstract class USDAFoodDatabase implements SyncFoodDataSource
     // search history that is being used in search
     private String lastSearchStr;
 
+    private FoodSearch search;
+
     public USDAFoodDatabase()
     {
         parseAsciiFile();
+
+        search = new HashFoodSearch(getCanonicalSearchableFoodItems(), getSearchHistory());
     }
 
     /**
      * Called on every interaction
+     *
      * @return Search history to be used
      */
     // template design pattern
@@ -64,34 +73,37 @@ public abstract class USDAFoodDatabase implements SyncFoodDataSource
 
         String ndbNo = parseString(c.get(0));
         String description = parseString(c.get(1));
-        String commonNames = parseString(c.get(2));
-        float waterG = parseValue(c.get(3));
-        float kcal = parseValue(c.get(4));
-        float protein = parseValue(c.get(5));
-        float fat = parseValue(c.get(6));
-        float carbs = parseValue(c.get(7));
-        float fiber = parseValue(c.get(8));
-        float sugars = parseValue(c.get(9));
-        float calciumMg = parseValue(c.get(10));
-        float ironMg = parseValue(c.get(11));
-        float magnesiumMg = parseValue(c.get(12));
-        float sodiumMg = parseValue(c.get(13));
-        float zincMg = parseValue(c.get(14));
-        float vitaminCMg = parseValue(c.get(15));
-        float vitaminB6Mg = parseValue(c.get(16));
-        float vitaminB12Microg = parseValue(c.get(17));
-        float vitaminAIU = parseValue(c.get(18));
-        float vitaminEMg = parseValue(c.get(19));
-        float vitaminDMicrog = parseValue(c.get(20));
-        float saturatedFatsG = parseValue(c.get(21));
-        float monounsaturatedFatsG = parseValue(c.get(22));
-        float polyunsaturatedFatsG = parseValue(c.get(23));
-        float cholesterolMg = parseValue(c.get(24));
-        int popularity = (int) parseValue(c.get(25));
+        String canonicalDescription = parseString(c.get(2));
+        String commonNames = parseString(c.get(3));
+        String commonNamesBase = parseString(c.get(4));
+
+        float waterG = parseValue(c.get(5));
+        float kcal = parseValue(c.get(6));
+        float protein = parseValue(c.get(7));
+        float fat = parseValue(c.get(8));
+        float carbs = parseValue(c.get(9));
+        float fiber = parseValue(c.get(10));
+        float sugars = parseValue(c.get(11));
+        float calciumMg = parseValue(c.get(12));
+        float ironMg = parseValue(c.get(13));
+        float magnesiumMg = parseValue(c.get(14));
+        float sodiumMg = parseValue(c.get(15));
+        float zincMg = parseValue(c.get(16));
+        float vitaminCMg = parseValue(c.get(17));
+        float vitaminB6Mg = parseValue(c.get(18));
+        float vitaminB12Microg = parseValue(c.get(19));
+        float vitaminAIU = parseValue(c.get(20));
+        float vitaminEMg = parseValue(c.get(21));
+        float vitaminDMicrog = parseValue(c.get(22));
+        float saturatedFatsG = parseValue(c.get(23));
+        float monounsaturatedFatsG = parseValue(c.get(24));
+        float polyunsaturatedFatsG = parseValue(c.get(25));
+        float cholesterolMg = parseValue(c.get(26));
+        int popularity = (int) parseValue(c.get(27));
 
         List<USDAFoodItem.CommonMeasure> commonMeasures = new ArrayList<>();
         // the rest are measures
-        for (int i = 26; i < c.size(); i += 3)
+        for (int i = 28; i < c.size(); i += 3)
         {
             float amnt = parseValue(c.get(i));
             String unit = parseString(c.get(i + 1));
@@ -103,7 +115,8 @@ public abstract class USDAFoodDatabase implements SyncFoodDataSource
 
         // parse components of the description
 
-        USDAFoodItem.DescriptionComp[] descriptionCompsArray = parseDescriptionComps(description, commonNames);
+        USDAFoodItem.DescriptionComp[] canonicalDescriptionCompsArray = parseDescriptionComps(canonicalDescription, commonNamesBase);
+        USDAFoodItem.DescriptionComp[] descriptionCompsArray = parseDescriptionComps(description, commonNamesBase);
 
         Map<Specification.NutrientType, NutrientQuantity> nutrients = new HashMap<>();
         nutrients.put(Specification.NutrientType.Water, new NutrientQuantity(waterG, NutrientQuantity.Unit.g));
@@ -127,7 +140,7 @@ public abstract class USDAFoodDatabase implements SyncFoodDataSource
         nutrients.put(Specification.NutrientType.FatMonounsaturated, new NutrientQuantity(monounsaturatedFatsG, NutrientQuantity.Unit.g));
         nutrients.put(Specification.NutrientType.FatPolyunsaturated, new NutrientQuantity(polyunsaturatedFatsG, NutrientQuantity.Unit.g));
         nutrients.put(Specification.NutrientType.Cholesterol, new NutrientQuantity(cholesterolMg, NutrientQuantity.Unit.Mg));
-        return new USDAFoodItem(ndbNo, description, descriptionCompsArray, nutrients, kcal, popularity,
+        return new USDAFoodItem(ndbNo, description, descriptionCompsArray, canonicalDescriptionCompsArray, nutrients, kcal, popularity,
                 commonMeasures.toArray(new USDAFoodItem.CommonMeasure[commonMeasures.size()]));
     }
 
@@ -143,22 +156,12 @@ public abstract class USDAFoodDatabase implements SyncFoodDataSource
             // The component can be something like "wheat flour". In this case, the component should be split
             // further into two subcomponents (for search) and the order should be reversed, as the last part
             // is more important most of the time
-            if (countOccurrences(strComp, ' ') == 1)
-            {
-                String[] subComps = strComp.split(" ");
+            String[] subComps = strComp.split(" ");
 
-                for (int i = subComps.length - 1; i >= 0; i--)
-                {
-                    USDAFoodItem.DescriptionComp descriptionComp = new USDAFoodItem.DescriptionComp();
-                    descriptionComp.comp = subComps[i];
-                    descriptionComp.priority = descriptionComps.size() + 1;
-                    descriptionComps.add(descriptionComp);
-                }
-
-            } else
+            for (int i = subComps.length - 1; i >= 0; i--)
             {
                 USDAFoodItem.DescriptionComp descriptionComp = new USDAFoodItem.DescriptionComp();
-                descriptionComp.comp = strComp;
+                descriptionComp.comp = subComps[i];
                 descriptionComp.priority = descriptionComps.size() + 1;
                 descriptionComps.add(descriptionComp);
             }
@@ -226,12 +229,29 @@ public abstract class USDAFoodDatabase implements SyncFoodDataSource
     @Override
     public List<SearchResultItem> search(String searchStr)
     {
-        lastSearchStr = searchStr;
-        FoodSearch foodSearch = new FoodSearch();
+        return search(searchStr, search);
+    }
+
+    public List<CanonicalSearchableFoodItem> getCanonicalSearchableFoodItems()
+    {
+        List<CanonicalSearchableFoodItem> searchableFoodItems = new ArrayList<>();
+        searchableFoodItems.addAll(entries);
+        return searchableFoodItems;
+    }
+
+    public List<SearchableFoodItem> getSearchableFoodItems()
+    {
         List<SearchableFoodItem> searchableFoodItems = new ArrayList<>();
         searchableFoodItems.addAll(entries);
-        return foodSearch.searchFood(searchStr, searchableFoodItems, getSearchHistory());
+        return searchableFoodItems;
     }
+
+    public List<SearchResultItem> search(String searchStr, FoodSearch search)
+    {
+        lastSearchStr = searchStr;
+        return search.searchFood(searchStr);
+    }
+
 
     @Override
     public FoodItem retrieve(String id)

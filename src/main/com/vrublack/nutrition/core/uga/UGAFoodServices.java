@@ -2,6 +2,9 @@ package com.vrublack.nutrition.core.uga;
 
 
 import com.vrublack.nutrition.core.*;
+import com.vrublack.nutrition.core.search.FoodSearch;
+import com.vrublack.nutrition.core.search.LevenshteinFoodSearch;
+import com.vrublack.nutrition.core.SearchableFoodItem;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -11,15 +14,21 @@ import java.util.List;
  */
 public class UGAFoodServices implements SyncFoodDataSource
 {
-    private List<UGAFoodItem> items = UGAScraper.scrapeAllLocations();
+    private List<UGAFoodItem> items;
+
+    private FoodSearch foodSearch;
+
+
+    public UGAFoodServices()
+    {
+        items = UGAScraper.scrapeAllLocations();
+        foodSearch = new LevenshteinFoodSearch(getSearchableFoodItems(), null);
+    }
 
     @Override
     public List<SearchResultItem> search(String searchStr)
     {
-        FoodSearch foodSearch = new FoodSearch();
-        List<SearchableFoodItem> searchableFoodItems = new ArrayList<>();
-        searchableFoodItems.addAll(items);
-        return foodSearch.searchFood(searchStr, searchableFoodItems, null);
+        return foodSearch.searchFood(searchStr);
     }
 
     @Override
@@ -36,5 +45,12 @@ public class UGAFoodServices implements SyncFoodDataSource
     public FoodItem get(String id)
     {
         return retrieve(id);
+    }
+
+    public List<SearchableFoodItem> getSearchableFoodItems()
+    {
+        List<SearchableFoodItem> searchableFoodItems = new ArrayList<>();
+        searchableFoodItems.addAll(items);
+        return searchableFoodItems;
     }
 }
