@@ -2,12 +2,10 @@ package com.vrublack.nutrition.console;
 
 import com.vrublack.nutrition.core.DummySearchHistory;
 import com.vrublack.nutrition.core.SearchHistory;
+import com.vrublack.nutrition.core.search.DescriptionBase;
 import com.vrublack.nutrition.core.usda.USDAFoodDatabase;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
+import java.io.*;
 
 public class LocalUSDAFoodDatabase extends USDAFoodDatabase
 {
@@ -42,5 +40,11 @@ public class LocalUSDAFoodDatabase extends USDAFoodDatabase
     public BufferedReader getBufferedReader() throws FileNotFoundException
     {
         return new BufferedReader(new FileReader(new File(FILENAME)));
+    }
+
+    @Override
+    public DescriptionBase getDescriptionBase() throws FileNotFoundException
+    {
+        return DescriptionBase.getDescriptionBase(new FileInputStream("food_english.0"));
     }
 }

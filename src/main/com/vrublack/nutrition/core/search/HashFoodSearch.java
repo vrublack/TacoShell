@@ -21,9 +21,14 @@ public class HashFoodSearch implements FoodSearch
 
     private SearchHistory searchHistory;
 
-    public HashFoodSearch(List<CanonicalSearchableFoodItem> entries, SearchHistory history)
+    private final DescriptionBase descriptionBase;
+
+
+    public HashFoodSearch(List<CanonicalSearchableFoodItem> entries, SearchHistory history, DescriptionBase base)
     {
         searchHistory = history;
+
+        descriptionBase = base;
 
         entryComps = new HashMap<>();
         for (CanonicalSearchableFoodItem entry : entries)
@@ -46,7 +51,7 @@ public class HashFoodSearch implements FoodSearch
             commonId = searchHistory.getNDBNumberForSearchResult(searchString);
         }
 
-        String[] queryComponents = DescriptionBase.descriptionToBase(searchString);
+        String[] queryComponents = descriptionBase.descriptionToBase(searchString);
 
         final Map<SearchableFoodItem, Float> matchScores = new HashMap<>();
 

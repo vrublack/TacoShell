@@ -7,6 +7,8 @@ import org.tartarus.snowball.ext.englishStemmer;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -15,23 +17,33 @@ import java.util.List;
  */
 public class DescriptionBase
 {
-    private static SpellDictionaryHashMap dictionary;
-    private static SpellChecker spellChecker;
+    private SpellDictionaryHashMap dictionary;
+    private SpellChecker spellChecker;
 
-    private static englishStemmer stemmer;
+    private englishStemmer stemmer;
 
-    static
+    public static DescriptionBase getDescriptionBase(InputStream is)
     {
+        DescriptionBase b = new DescriptionBase();
         try
         {
-            dictionary = new SpellDictionaryHashMap(new File("src/main/resources/food_english.0"));
+            b.dictionary = new SpellDictionaryHashMap(new InputStreamReader(is));
         } catch (IOException e)
         {
             e.printStackTrace();
-        }
-        spellChecker = new SpellChecker(dictionary);
 
-        stemmer = new englishStemmer();
+            return null;
+        }
+        b.spellChecker = new SpellChecker(b.dictionary);
+
+        b.stemmer = new englishStemmer();
+
+        return b;
+    }
+
+    private DescriptionBase()
+    {
+
     }
 
     /**
@@ -41,7 +53,7 @@ public class DescriptionBase
      * @param desc Description, like "brown sugar". Can also contain commas or other separators, like "Tomatoes, canned, no solids"
      * @return Decomposed query in base form
      */
-    public static String[] descriptionToBase(String desc)
+    public String[] descriptionToBase(String desc)
     {
         String[] comps = desc.split("[^\\w]");
 
@@ -61,7 +73,7 @@ public class DescriptionBase
      *
      * @return Sub-words or word itself
      */
-    private static String[] decompose(String word)
+    private String[] decompose(String word)
     {
         // currently only decompose into at most two words because a) the algorithm is faster,
         // b) there are really only two-compound words and c) otherwise it would be more
@@ -86,7 +98,8 @@ public class DescriptionBase
     /**
      * Brings the component into base form, that is correct spelling and form the stem (berry -> berries, for example)
      */
-    private static String componentToBase(String component)
+
+    private String componentToBase(String component)
     {
         component = component.toLowerCase();
 

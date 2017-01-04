@@ -3,6 +3,7 @@ package com.vrublack.nutrition;
 
 import com.vrublack.nutrition.console.LocalSearchHistory;
 import com.vrublack.nutrition.console.LocalUSDAFoodDatabase;
+import com.vrublack.nutrition.core.search.DescriptionBase;
 import com.vrublack.nutrition.core.search.LevenshteinFoodSearch;
 import com.vrublack.nutrition.core.Pair;
 import com.vrublack.nutrition.core.SearchResultItem;
@@ -19,7 +20,7 @@ public class SearchEvaluation
 
     private LocalUSDAFoodDatabase db = new LocalUSDAFoodDatabase(false);    // don't use search history
 
-    public void evaluateWithHistory()
+    public void evaluateWithHistory() throws FileNotFoundException
     {
         System.out.println("--EVALUATING WITH HISTORY--");
         evaluatePairs(hist.getQueryIdPairs());
@@ -50,14 +51,14 @@ public class SearchEvaluation
         return pairs;
     }
 
-    public void evaluateWithCustomPairs()
+    public void evaluateWithCustomPairs() throws FileNotFoundException
     {
         List<Pair<String, String>> pairs = loadPairs("src/test/resources/search_pairs.csv");
         System.out.println("--EVALUATING WITH CUSTOM PAIRS--");
         evaluatePairs(pairs);
     }
 
-    private void evaluatePairs(List<Pair<String, String>> queryIdPairs)
+    private void evaluatePairs(List<Pair<String, String>> queryIdPairs) throws FileNotFoundException
     {
         float levenshteinScore = 0;
         float stemScore = 0;
@@ -66,7 +67,7 @@ public class SearchEvaluation
         int count = 0;
 
         FoodSearch levenshteinSearch = new LevenshteinFoodSearch(db.getSearchableFoodItems(), null);
-        FoodSearch stemSearch = new HashFoodSearch(db.getCanonicalSearchableFoodItems(), null);
+        FoodSearch stemSearch = new HashFoodSearch(db.getCanonicalSearchableFoodItems(), null, DescriptionBase.getDescriptionBase(new FileInputStream("food_english.0")));
 
         for (int i = 0; i < queryIdPairs.size(); i++)
         {
@@ -108,7 +109,7 @@ public class SearchEvaluation
             return index * index;
     }
 
-    public static void main(String[] args)
+    public static void main(String[] args) throws FileNotFoundException
     {
         SearchEvaluation eval = new SearchEvaluation();
         // eval.evaluateWithCustomPairs();

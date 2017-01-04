@@ -2,9 +2,11 @@ package com.vrublack.nutrition.core.usda;
 
 import com.vrublack.nutrition.core.*;
 import com.vrublack.nutrition.core.CanonicalSearchableFoodItem;
+import com.vrublack.nutrition.core.search.DescriptionBase;
 import com.vrublack.nutrition.core.search.FoodSearch;
 import com.vrublack.nutrition.core.search.HashFoodSearch;
 import com.vrublack.nutrition.core.SearchableFoodItem;
+import com.vrublack.nutrition.core.search.LevenshteinFoodSearch;
 
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
@@ -27,9 +29,30 @@ public abstract class USDAFoodDatabase implements SyncFoodDataSource
 
     public USDAFoodDatabase()
     {
-        parseAsciiFile();
+        parseAsciiFile(null, 0);
 
-        search = new HashFoodSearch(getCanonicalSearchableFoodItems(), getSearchHistory());
+        try
+        {
+            search = new HashFoodSearch(getCanonicalSearchableFoodItems(), getSearchHistory(), getDescriptionBase());
+        } catch (FileNotFoundException e)
+        {
+            e.printStackTrace();
+            search = new LevenshteinFoodSearch(getSearchableFoodItems(), getSearchHistory());
+        }
+    }
+
+    public USDAFoodDatabase(Runnable onStatusUpdate, float percentagInterval)
+    {
+        parseAsciiFile(onStatusUpdate, percentagInterval);
+
+        try
+        {
+            search = new HashFoodSearch(getCanonicalSearchableFoodItems(), getSearchHistory(), getDescriptionBase());
+        } catch (FileNotFoundException e)
+        {
+            e.printStackTrace();
+            search = new LevenshteinFoodSearch(getSearchableFoodItems(), getSearchHistory());
+        }
     }
 
     /**
@@ -37,28 +60,51 @@ public abstract class USDAFoodDatabase implements SyncFoodDataSource
      *
      * @return Search history to be used
      */
-    // template design pattern
+    // design pattern: template method
     protected abstract SearchHistory getSearchHistory();
 
     /**
      * @return BufferedReader that points to the USDA ascii file
      */
+    // design pattern: template method
     public abstract BufferedReader getBufferedReader() throws FileNotFoundException;
+
+    /**
+     *
+     * @return Description base for hash search
+     */
+    // design pattern: template method
+    public abstract DescriptionBase getDescriptionBase() throws FileNotFoundException;
+
 
     /**
      * Parses ascii file containing foodItem items and their nutrition values.
      * Source: http://www.ars.usda.gov/Services/docs.htm?docid=24936
+     *
+     * @param onStatusUpdate
+     * @param percentagInterval
      */
     // template design pattern
-    private void parseAsciiFile()
+    private void parseAsciiFile(Runnable onStatusUpdate, float percentagInterval)
     {
         entries = new LinkedList<>();
         try (BufferedReader br = getBufferedReader())
         {
+            final int totalEntries = 8463;
+            int count = 0;
+            int intervalI = 1;
+
             String line;
             while ((line = br.readLine()) != null)
             {
                 entries.add(parseFood(line));
+
+                count++;
+                if (onStatusUpdate != null && count / (float) totalEntries >= percentagInterval * intervalI)
+                {
+                    intervalI++;
+                    onStatusUpdate.run();
+                }
             }
         } catch (IOException e)
         {
