@@ -6,8 +6,6 @@ import com.vrublack.nutrition.core.SearchResultItem;
 import com.vrublack.nutrition.core.SearchableFoodItem;
 
 import java.util.*;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 /**
  * Searches foodItem in a list of food items, using the design pattern "visitor". Faster than LevenshteinFoodSearch by
@@ -33,7 +31,7 @@ public class HashFoodSearch implements FoodSearch
             for (SearchableFoodItem.DescriptionComp comp : entry.getCanonicalDescriptionComps())
             {
                 if (!entryComps.containsKey(comp.comp))
-                    entryComps.put(comp.comp, new HashSet<>());
+                    entryComps.put(comp.comp, new HashSet<CanonicalSearchableFoodItem>());
                 entryComps.get(comp.comp).add(entry);
             }
         }
@@ -50,7 +48,7 @@ public class HashFoodSearch implements FoodSearch
 
         String[] queryComponents = DescriptionBase.descriptionToBase(searchString);
 
-        Map<SearchableFoodItem, Float> matchScores = new HashMap<>();
+        final Map<SearchableFoodItem, Float> matchScores = new HashMap<>();
 
         // find entry that occurrs most times in items to which the inidividual comps map
         for (String queryComp : queryComponents)
@@ -68,15 +66,24 @@ public class HashFoodSearch implements FoodSearch
             }
         }
 
-        Function<Map.Entry<SearchableFoodItem, Float>, SearchResultItem> converter
-                = entry -> new SearchResultItem(entry.getKey().getId(), entry.getKey().getDescription(),
-                entry.getKey().getNutritionInformation(), entry.getKey().getRelativePopularity(), entry.getValue());
+        List<SearchableFoodItem> l = new ArrayList<>(matchScores.keySet());
 
+        Collections.sort(l, new Comparator<SearchableFoodItem>()
+        {
+            @Override
+            public int compare(SearchableFoodItem o1, SearchableFoodItem o2)
+            {
+                return matchScores.get(o2).compareTo(matchScores.get(o1));
+            }
+        });
 
-        return matchScores.entrySet().stream()
-                .sorted(Map.Entry.<SearchableFoodItem, Float>comparingByValue().reversed())
-                .map(converter)
-                .collect(Collectors.<SearchResultItem>toList());
+        List<SearchResultItem> results = new ArrayList<>();
+
+        for (SearchableFoodItem item : l)
+            results.add(new SearchResultItem(item.getId(), item.getDescription(), item.getNutritionInformation(),
+                    item.getRelativePopularity(), matchScores.get(item)));
+
+        return results;
     }
 
     /**

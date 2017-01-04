@@ -48,14 +48,18 @@ public class LevenshteinFoodSearch implements FoodSearch
             }
         }
 
-        Collections.sort(matches, (o1, o2) ->
+        Collections.sort(matches, new Comparator<InternalResultItem>()
         {
-            if (o1.score == o2.score)
-                return 0;
-            else if (o1.score < o2.score)
-                return 1;
-            else
-                return -1;
+            @Override
+            public int compare(InternalResultItem o1, InternalResultItem o2)
+            {
+                if (o1.score == o2.score)
+                    return 0;
+                else if (o1.score < o2.score)
+                    return 1;
+                else
+                    return -1;
+            }
         });
 
         return strip(matches);
