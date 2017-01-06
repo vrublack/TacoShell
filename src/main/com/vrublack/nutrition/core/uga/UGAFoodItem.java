@@ -96,6 +96,14 @@ public class UGAFoodItem extends SearchableFoodItem implements Serializable
     public void addLocation(String location)
     {
         locations.add(location);
+
+        // add to description comps
+        DescriptionComp[] newComps = new DescriptionComp[descriptionComps.length + 1];
+        System.arraycopy(descriptionComps, 0, newComps, 0, descriptionComps.length);
+        newComps[descriptionComps.length] = new DescriptionComp();
+        newComps[descriptionComps.length].comp = location;
+        newComps[descriptionComps.length].priority = 5;
+        descriptionComps = newComps;
     }
 
     @Override
