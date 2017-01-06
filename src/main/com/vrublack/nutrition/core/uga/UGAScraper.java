@@ -13,11 +13,17 @@ import java.util.*;
 
 public class UGAScraper
 {
-    private final static String BASE_URL = "http://foodservice.uga.edu/locations/";
+    private final static String BASE_URL = "https://foodservice.uga.edu/locations/";
     private final static String[] DINING_HALLS = {"Bolton", "Oglethorpe", "Snelling", "Village Summit", "The Niche"};
 
     public static List<UGAFoodItem> scrapeAllLocations()
     {
+        // fixes SSL bug in Java
+        System.setProperty("jsse.enableSNIExtension", "false");
+        // prevent website from showing mobile view
+        System.setProperty("http.agent", "");
+
+
         List<UGAFoodItem> all = new ArrayList<>();
 
         Thread[] workers = new Thread[DINING_HALLS.length];
