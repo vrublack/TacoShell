@@ -197,6 +197,23 @@ public class UGAFoodItem extends SearchableFoodItem implements Serializable
         return unit;
     }
 
+    @Override
+    public boolean equals(Object o)
+    {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        UGAFoodItem that = (UGAFoodItem) o;
+
+        return id != null ? id.equals(that.id) : that.id == null;
+    }
+
+    @Override
+    public int hashCode()
+    {
+        return id != null ? id.hashCode() : 0;
+    }
+
     public void addLocations(UGAFoodItem item)
     {
         this.locations.addAll(item.locations);
