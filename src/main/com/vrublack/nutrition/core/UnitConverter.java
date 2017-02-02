@@ -122,6 +122,11 @@ public class UnitConverter
                 unit = "fl oz";
                 break;
 
+            case "kcal":
+            case "calories":
+                unit = "kcal";
+                break;
+
             // unspecified unit means implicit "num"
             default:
                 return null;
@@ -401,6 +406,24 @@ public class UnitConverter
         }
 
         throw new IllegalArgumentException("Conversion not possible");
+    }
+
+    /**
+     * @param targetKcal Target Calories
+     * @param item       Food item
+     * @return A unit that yields the specified amount of calories for the item
+     */
+    public static FoodQuantity quantityForCalories(float targetKcal, FoodItem item)
+    {
+        FoodQuantity[] acceptedUnits = item.getAcceptedUnits();
+        if (acceptedUnits.length == 0)
+            return null;
+
+        // take first available unit, see how many calories one of it has, and the scale it down linearly
+        FoodQuantity testQuantity = new FoodQuantity(1, acceptedUnits[0].getSimpleUnit(),
+                acceptedUnits[0].getDetailedUnit());
+        float kcal = item.getCaloriesPerQuantity(testQuantity);
+        return new FoodQuantity(targetKcal / kcal, testQuantity.getSimpleUnit(), testQuantity.getDetailedUnit());
     }
 
     /**

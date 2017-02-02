@@ -66,7 +66,10 @@ public class FoodSpecification extends Specification implements IsSerializable, 
     private void init(FoodItem foodItem, float quantifier, String unit, boolean microNutrientsOnly, boolean strict)
     {
         this.foodItem = foodItem;
-        this.quantity = UnitConverter.matchUnit(new FoodQuantity(quantifier, unit, unit), foodItem.getAcceptedUnits(), strict);
+        if (unit.equals("kcal"))
+            this.quantity = UnitConverter.quantityForCalories(quantifier, foodItem);
+        else
+            this.quantity = UnitConverter.matchUnit(new FoodQuantity(quantifier, unit, unit), foodItem.getAcceptedUnits(), strict);
         if (this.quantity == null)
             throw new IllegalArgumentException("Invalid unit");
         this.id = foodItem.getId() + StringGenerator.generateString(5);
