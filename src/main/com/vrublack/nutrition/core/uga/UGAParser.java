@@ -8,6 +8,7 @@ import com.vrublack.nutrition.core.FoodQuantity;
 import com.vrublack.nutrition.core.NutrientQuantity;
 import com.vrublack.nutrition.core.ParseException;
 import com.vrublack.nutrition.core.Specification;
+import org.unbescape.html.HtmlEscape;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -34,7 +35,7 @@ public class UGAParser
                 int endInfo = content.indexOf("}\"", startInfo + 1);
 
                 String data = content.substring(startInfo + 1, endInfo + 1);
-                data = data.replace("&quot;", "\"");
+                data = HtmlEscape.unescapeHtml(data);
 
                 JsonObject json;
                 try
