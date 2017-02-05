@@ -106,6 +106,11 @@ public class UGAFoodItem extends SearchableFoodItem implements Serializable
         descriptionComps = newComps;
     }
 
+    public Set<String> getLocations()
+    {
+        return locations;
+    }
+
     @Override
     public String getId()
     {

@@ -9,14 +9,10 @@ import com.vrublack.nutrition.core.SearchableFoodItem;
 import com.vrublack.nutrition.core.util.Debug;
 import com.vrublack.nutrition.core.util.Util;
 
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Scrapes the University of Georgia's food services website for meals and nutrition info.
@@ -38,15 +34,26 @@ public class UGAFoodServices implements SyncFoodDataSource
     }
 
     /**
+     * Initializes with cached items
+     *
+     * @param filename Filename of cached files
+     */
+    public UGAFoodServices(String filename)
+    {
+        readCached(filename);
+        foodSearch = new LevenshteinFoodSearch(getSearchableFoodItems(), null);
+    }
+
+    /**
      * Reads items from saved web pages in directory
      *
      * @param directory Directory where web pages are in
      */
-    public UGAFoodServices(String directory)
+    public static List<UGAFoodItem> readFromDownloadedPages(String directory)
     {
-        items = new ArrayList<>();
+        List<UGAFoodItem> items = new ArrayList<>();
 
-        Set<UGAFoodItem> itemsSet = new HashSet<>();
+        Map<String, UGAFoodItem> itemsSet = new HashMap<>();
 
         File dir = new File(directory);
         String[] files = dir.list();
@@ -57,21 +64,82 @@ public class UGAFoodServices implements SyncFoodDataSource
             try
             {
                 content = Util.readFile(new File(directory, fname));
-                List<UGAFoodItem> newItems = UGAParser.parsePage(content, "dontknow");
+                int diningHallEnd = fname.indexOf('_');
+                if (diningHallEnd == -1)
+                    continue;
+                String diningHall = fname.substring(0, diningHallEnd);
+                switch (diningHall)
+                {
+                    case "bolton":
+                        diningHall = "Bolton";
+                        break;
+                    case "village-summit":
+                        diningHall = "Village Summit";
+                        break;
+                    case "snelling":
+                        diningHall = "Snelling";
+                        break;
+                    case "oglethorpe":
+                        diningHall = "Oglethorpe";
+                        break;
+                    case "niche":
+                        diningHall = "Niche";
+                        break;
+                }
+                List<UGAFoodItem> newItems = UGAParser.parsePage(content, diningHall);
                 totalEntries += newItems.size();
-                itemsSet.addAll(newItems);
+
+                // add these items to the set if they don't exist yet, and if they exist, add the name of the dining hall,
+                // if not already added
+                for (UGAFoodItem it : newItems)
+                {
+                    if (itemsSet.containsKey(it.getId()))
+                    {
+                        itemsSet.get(it.getId()).addLocation((String) it.getLocations().toArray()[0]);
+                    } else
+                    {
+                        itemsSet.put(it.getId(), it);
+                    }
+                }
             } catch (IOException e)
             {
                 e.printStackTrace();
             }
         }
 
-        items = new ArrayList<>(itemsSet);
-        foodSearch = new LevenshteinFoodSearch(getSearchableFoodItems(), null);
+        items = new ArrayList<>(itemsSet.values());
 
         if (Config.DEBUG)
             System.out.println("Items loaded: " + totalEntries + " (" + items.size() + " unique)");
+
+        return items;
     }
+
+    private void readCached(String fname)
+    {
+        try
+        {
+            ObjectInputStream ois = new ObjectInputStream(new FileInputStream(fname));
+            items = (List<UGAFoodItem>) ois.readObject();
+        } catch (IOException | ClassNotFoundException e)
+        {
+            e.printStackTrace();
+            items = new ArrayList<>();
+        }
+    }
+
+    public static void itemsToFile(List<UGAFoodItem> items, String fname)
+    {
+        try
+        {
+            ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(fname));
+            oos.writeObject(items);
+        } catch (IOException e)
+        {
+            e.printStackTrace();
+        }
+    }
+
 
     @Override
     public List<SearchResultItem> search(String searchStr)

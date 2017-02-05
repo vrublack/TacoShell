@@ -517,7 +517,7 @@ public class Console
                 System.out.println("Data source switched to USDA Database");
                 break;
             case "uga":
-                dataSource = new UGAFoodServices();
+                dataSource = new UGAFoodServices("UGA.cache");
                 System.out.println("Data source switched to the University of Georgia");
                 break;
             default:
