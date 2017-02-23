@@ -13,7 +13,7 @@ import java.util.*;
 
 public class UGAScraper
 {
-    private final static String BASE_URL = "https://foodservice.uga.edu/locations/";
+    private final static String BASE_URL = "https://drupalserver.printing.uga.edu/index.php/nutrition/viewMenu/";
     private final static String[] DINING_HALLS = {"Bolton", "Oglethorpe", "Snelling", "Village Summit", "The Niche"};
 
     public static List<UGAFoodItem> scrapeAllLocations()
@@ -22,7 +22,6 @@ public class UGAScraper
         System.setProperty("jsse.enableSNIExtension", "false");
         // prevent website from showing mobile view
         System.setProperty("http.agent", "");
-
 
         List<UGAFoodItem> all = new ArrayList<>();
 
@@ -95,6 +94,8 @@ public class UGAScraper
 
         try
         {
+            // not working since date has to be selected, so:
+            // TODO select data before executing this request
             content = HTTPRequest.executeGet(baseUrl, diningHall.replace(" ", "-"), new HTTPRequest.NameValuePair[]{});
             return UGAParser.parsePage(content, diningHall);
 

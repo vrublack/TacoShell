@@ -89,6 +89,8 @@ public class UGAFoodServices implements SyncFoodDataSource
                 List<UGAFoodItem> newItems = UGAParser.parsePage(content, diningHall);
                 totalEntries += newItems.size();
 
+                long setSizeBefore = itemsSet.size();
+
                 // add these items to the set if they don't exist yet, and if they exist, add the name of the dining hall,
                 // if not already added
                 for (UGAFoodItem it : newItems)
@@ -101,6 +103,9 @@ public class UGAFoodServices implements SyncFoodDataSource
                         itemsSet.put(it.getId(), it);
                     }
                 }
+
+                System.out.println("Added " + (itemsSet.size() - setSizeBefore) + " items");
+
             } catch (IOException e)
             {
                 e.printStackTrace();
