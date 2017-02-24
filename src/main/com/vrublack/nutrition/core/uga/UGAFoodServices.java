@@ -3,7 +3,9 @@ package com.vrublack.nutrition.core.uga;
 
 import com.Config;
 import com.vrublack.nutrition.core.*;
+import com.vrublack.nutrition.core.search.DescriptionBase;
 import com.vrublack.nutrition.core.search.FoodSearch;
+import com.vrublack.nutrition.core.search.HashFoodSearch;
 import com.vrublack.nutrition.core.search.LevenshteinFoodSearch;
 import com.vrublack.nutrition.core.SearchableFoodItem;
 import com.vrublack.nutrition.core.util.Debug;
@@ -30,18 +32,27 @@ public class UGAFoodServices implements SyncFoodDataSource
     public UGAFoodServices()
     {
         items = UGAScraper.scrapeAllLocations();
-        foodSearch = new LevenshteinFoodSearch(getSearchableFoodItems(), null);
+        try
+        {
+            foodSearch = new HashFoodSearch(getCanonicalSearchableFoodItems(), null,
+                    DescriptionBase.getDescriptionBase(new FileInputStream("uga_dict.0")));
+        } catch (FileNotFoundException e)
+        {
+            e.printStackTrace();
+        }
     }
 
     /**
      * Initializes with cached items
      *
-     * @param filename Filename of cached files
+     * @param is Stream to read cached items
+     * @param baseDicIs InputStream to base dictionary
      */
-    public UGAFoodServices(String filename)
+    public UGAFoodServices(InputStream is, InputStream baseDicIs)
     {
-        readCached(filename);
-        foodSearch = new LevenshteinFoodSearch(getSearchableFoodItems(), null);
+        readCached(is);
+        foodSearch = new HashFoodSearch(getCanonicalSearchableFoodItems(), null,
+                DescriptionBase.getDescriptionBase(baseDicIs));
     }
 
     /**
@@ -120,11 +131,11 @@ public class UGAFoodServices implements SyncFoodDataSource
         return items;
     }
 
-    private void readCached(String fname)
+    private void readCached(InputStream is)
     {
         try
         {
-            ObjectInputStream ois = new ObjectInputStream(new FileInputStream(fname));
+            ObjectInputStream ois = new ObjectInputStream(is);
             items = (List<UGAFoodItem>) ois.readObject();
         } catch (IOException | ClassNotFoundException e)
         {
@@ -174,4 +185,12 @@ public class UGAFoodServices implements SyncFoodDataSource
         searchableFoodItems.addAll(items);
         return searchableFoodItems;
     }
+
+    public List<CanonicalSearchableFoodItem> getCanonicalSearchableFoodItems()
+    {
+        List<CanonicalSearchableFoodItem> searchableFoodItems = new ArrayList<>();
+        searchableFoodItems.addAll(items);
+        return searchableFoodItems;
+    }
+
 }

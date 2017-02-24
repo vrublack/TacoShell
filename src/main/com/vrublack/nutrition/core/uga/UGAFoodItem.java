@@ -6,7 +6,7 @@ import com.vrublack.nutrition.core.SearchableFoodItem;
 import java.io.Serializable;
 import java.util.*;
 
-public class UGAFoodItem extends SearchableFoodItem implements Serializable
+public class UGAFoodItem extends CanonicalSearchableFoodItem implements Serializable
 {
     private static final long serialVersionUID = 14235;
 
@@ -31,7 +31,11 @@ public class UGAFoodItem extends SearchableFoodItem implements Serializable
     // for search
     private DescriptionComp[] descriptionComps;
 
-    public UGAFoodItem(String name, FoodQuantity quantity, float kcal, Map<Specification.NutrientType, NutrientQuantity> nutrients)
+    private DescriptionComp[] canonicalDescriptionComps;
+
+
+    public UGAFoodItem(String name, FoodQuantity quantity, float kcal, Map<Specification.NutrientType, NutrientQuantity> nutrients,
+                       DescriptionComp[] descriptionComps, DescriptionComp[] canonicalDescriptionComps)
     {
         this.id = Integer.toString(Math.abs(name.hashCode()));
         // limit id to 7 characters
@@ -45,7 +49,8 @@ public class UGAFoodItem extends SearchableFoodItem implements Serializable
         this.calories = kcal;
         this.nutrients = nutrients;
 
-        this.descriptionComps = parseDescriptionComps(name);
+        this.descriptionComps = descriptionComps;
+        this.canonicalDescriptionComps = canonicalDescriptionComps;
 
         this.servingQuantity = new FoodQuantity(1, "serving", "serving (" + quantity + ")");
 
@@ -67,28 +72,6 @@ public class UGAFoodItem extends SearchableFoodItem implements Serializable
                 count++;
         return count;
     }
-
-    private DescriptionComp[] parseDescriptionComps(String description)
-    {
-        // Simpler implementation than for USDA description comps for the following reasons:
-        // 1. There are fewer food items from the UGA source than from the USDA source, so it's not as crucial
-        // to distinguish the position of the comp.
-        // 2. Descriptions used by UGA are in a less strict format, which makes a more intelligent processing more difficult.
-        String[] strComps = description.split("[, ()]");
-        List<DescriptionComp> descriptionComps = new ArrayList<>();
-        for (String strComp : strComps)
-        {
-            strComp = strComp.trim();
-
-            DescriptionComp descriptionComp = new DescriptionComp();
-            descriptionComp.comp = strComp; // reverse order
-            descriptionComp.priority = descriptionComps.size() + 1;
-            descriptionComps.add(descriptionComp);
-        }
-
-        return descriptionComps.toArray(new DescriptionComp[descriptionComps.size()]);
-    }
-
 
     /**
      * @param location Location (dining hall, etc.) where this item is available
@@ -242,5 +225,11 @@ public class UGAFoodItem extends SearchableFoodItem implements Serializable
                 + "kcal | Fat: " + (fat == null ? "-" : fat)
                 + " | Carbs: " + (carbs == null ? "-" : carbs)
                 + " | Protein: " + (protein == null ? "-" : protein);
+    }
+
+    @Override
+    public DescriptionComp[] getCanonicalDescriptionComps()
+    {
+        return canonicalDescriptionComps;
     }
 }

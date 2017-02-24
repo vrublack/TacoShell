@@ -4,12 +4,12 @@ import com.Config;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonSyntaxException;
-import com.vrublack.nutrition.core.FoodQuantity;
-import com.vrublack.nutrition.core.NutrientQuantity;
-import com.vrublack.nutrition.core.ParseException;
-import com.vrublack.nutrition.core.Specification;
+import com.vrublack.nutrition.core.*;
+import com.vrublack.nutrition.core.search.DescriptionBase;
 import org.unbescape.html.HtmlEscape;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -129,7 +129,12 @@ public class UGAParser
                     }
                 }
 
-                UGAFoodItem item = new UGAFoodItem(name, new FoodQuantity(quantifier, unit, unit), kcal, nutrients);
+                SearchableFoodItem.DescriptionComp[] descriptionComps = parseDescriptionComps(name);
+                SearchableFoodItem.DescriptionComp[] canonicalDescriptionComps = toCanonical(descriptionComps);
+
+                UGAFoodItem item = new UGAFoodItem(name, new FoodQuantity(quantifier, unit, unit), kcal, nutrients, descriptionComps,
+                        canonicalDescriptionComps);
+
                 item.addLocation(diningHall);
                 items.add(item);
 
@@ -143,6 +148,57 @@ public class UGAParser
         }
 
         return items;
+    }
+
+    private static SearchableFoodItem.DescriptionComp[] toCanonical(SearchableFoodItem.DescriptionComp[] descriptionComps)
+    {
+        List<SearchableFoodItem.DescriptionComp> canonical = new ArrayList<>();
+
+        try
+        {
+            DescriptionBase base = DescriptionBase.getDescriptionBase(new FileInputStream("uga_dict.0"));
+
+            int compIndex = 1;
+
+            for (SearchableFoodItem.DescriptionComp comp : descriptionComps)
+            {
+                String[] comps = base.descriptionToBase(comp.comp);
+                for (String s : comps)
+                {
+                    SearchableFoodItem.DescriptionComp c = new SearchableFoodItem.DescriptionComp();
+                    c.comp = s;
+                    c.priority = compIndex++;
+                    canonical.add(c);
+                }
+            }
+
+        } catch (FileNotFoundException e)
+        {
+            e.printStackTrace();
+        }
+
+        return canonical.toArray(new SearchableFoodItem.DescriptionComp[canonical.size()]);
+    }
+
+    private static SearchableFoodItem.DescriptionComp[] parseDescriptionComps(String description)
+    {
+        // Simpler implementation than for USDA description comps for the following reasons:
+        // 1. There are fewer food items from the UGA source than from the USDA source, so it's not as crucial
+        // to distinguish the position of the comp.
+        // 2. Descriptions used by UGA are in a less strict format, which makes a more intelligent processing more difficult.
+        String[] strComps = description.split("[, ()]");
+        List<SearchableFoodItem.DescriptionComp> descriptionComps = new ArrayList<>();
+        for (String strComp : strComps)
+        {
+            strComp = strComp.trim();
+
+            SearchableFoodItem.DescriptionComp descriptionComp = new SearchableFoodItem.DescriptionComp();
+            descriptionComp.comp = strComp; // reverse order
+            descriptionComp.priority = descriptionComps.size() + 1;
+            descriptionComps.add(descriptionComp);
+        }
+
+        return descriptionComps.toArray(new SearchableFoodItem.DescriptionComp[descriptionComps.size()]);
     }
 
     // convenience method

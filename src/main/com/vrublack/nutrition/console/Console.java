@@ -12,6 +12,8 @@ import org.ini4j.Ini;
 import org.ini4j.Profile;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -517,8 +519,15 @@ public class Console
                 System.out.println("Data source switched to USDA Database");
                 break;
             case "uga":
-                dataSource = new UGAFoodServices("UGA.cache");
-                System.out.println("Data source switched to the University of Georgia");
+                try
+                {
+                    dataSource = new UGAFoodServices(new FileInputStream("UGA.cache"),
+                            new FileInputStream("uga_dict.0"));
+                    System.out.println("Data source switched to the University of Georgia");
+                } catch (FileNotFoundException e)
+                {
+                    e.printStackTrace();
+                }
                 break;
             default:
                 System.out.println("Unknown datasource. Available datasources are fatsecret, usda and uga.");
