@@ -2,6 +2,9 @@ package com.vrublack.nutrition.core.uga;
 
 
 import com.Config;
+import com.esotericsoftware.kryo.Kryo;
+import com.esotericsoftware.kryo.io.Input;
+import com.esotericsoftware.kryo.io.Output;
 import com.vrublack.nutrition.core.*;
 import com.vrublack.nutrition.core.search.DescriptionBase;
 import com.vrublack.nutrition.core.search.FoodSearch;
@@ -45,7 +48,7 @@ public class UGAFoodServices implements SyncFoodDataSource
     /**
      * Initializes with cached items
      *
-     * @param is Stream to read cached items
+     * @param is        Stream to read cached items
      * @param baseDicIs InputStream to base dictionary
      */
     public UGAFoodServices(InputStream is, InputStream baseDicIs)
@@ -133,23 +136,20 @@ public class UGAFoodServices implements SyncFoodDataSource
 
     private void readCached(InputStream is)
     {
-        try
-        {
-            ObjectInputStream ois = new ObjectInputStream(is);
-            items = (List<UGAFoodItem>) ois.readObject();
-        } catch (IOException | ClassNotFoundException e)
-        {
-            e.printStackTrace();
-            items = new ArrayList<>();
-        }
+        Kryo kryo = new Kryo();
+        Input input = new Input(is);
+        items = kryo.readObject(input, ArrayList.class);
+        input.close();
     }
 
     public static void itemsToFile(List<UGAFoodItem> items, String fname)
     {
         try
         {
-            ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(fname));
-            oos.writeObject(items);
+            Kryo kryo = new Kryo();
+            Output output = new Output(new FileOutputStream(fname));
+            kryo.writeObject(output, items);
+            output.close();
         } catch (IOException e)
         {
             e.printStackTrace();
