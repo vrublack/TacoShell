@@ -5,7 +5,6 @@ import com.Config;
 import com.vrublack.nutrition.core.*;
 import com.vrublack.nutrition.core.Formatter;
 import com.vrublack.nutrition.core.fatsecret.FatsecretAPI;
-import com.vrublack.nutrition.core.uga.UGAFoodServices;
 import com.vrublack.nutrition.core.userdb.UserFoodDatabase;
 import com.vrublack.nutrition.core.userdb.UserFoodItem;
 import org.ini4j.Ini;
@@ -465,7 +464,7 @@ public class Console
                 // UNDO
                 "(no arguments)",
                 // SOURCE
-                "[source]\n\tsource:\t\"USDA\" (http://www.ars.usda.gov/Services/docs.htm?docid=24936), \"FatSecret\" (https://www.fatsecret.com) or \"UGA\" (http://foodservice.uga.edu/locations)",
+                "[source]\n\tsource:\t\"USDA\" (http://www.ars.usda.gov/Services/docs.htm?docid=24936) or \"FatSecret\" (https://www.fatsecret.com)",
                 // HELP
                 "[command]\n\tcommand:\tCommand to show options for"
 
@@ -518,19 +517,8 @@ public class Console
                 dataSource = new LocalUSDAFoodDatabase(!Config.DEBUG);
                 System.out.println("Data source switched to USDA Database");
                 break;
-            case "uga":
-                try
-                {
-                    dataSource = new UGAFoodServices(new FileInputStream("UGA.cache"),
-                            new FileInputStream("uga_dict.0"));
-                    System.out.println("Data source switched to the University of Georgia");
-                } catch (FileNotFoundException e)
-                {
-                    e.printStackTrace();
-                }
-                break;
             default:
-                System.out.println("Unknown datasource. Available datasources are fatsecret, usda and uga.");
+                System.out.println("Unknown datasource. Available datasources are fatsecret and usda.");
                 break;
         }
     }
