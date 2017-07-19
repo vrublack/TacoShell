@@ -106,7 +106,7 @@ public class LevenshteinFoodSearch implements FoodSearch
                 {
                     // the further in the back of a description something stands, the more irrelevant it is,
                     // e.gram. POTATO is more relevant in "POTATO,RAW" than in "SOUP,POTATO"
-                    float match = 40 * getPositionFactorForComponent(descriptionComp.priority);
+                    float match = 80 * getPositionFactorForComponent(descriptionComp.priority);
                     if (match > highestMatchesPerComponent[i])
                         highestMatchesPerComponent[i] = match;
                 } else      // not equal
