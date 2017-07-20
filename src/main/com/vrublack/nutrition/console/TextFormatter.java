@@ -53,7 +53,6 @@ public class TextFormatter extends Formatter
     }
 
     /**
-     *
      * @return Default nutrient type in it's corresponding unit from getDefaultUnits()
      */
     public static List<Specification.NutrientType> getDefaultShownNutrients()
@@ -62,7 +61,6 @@ public class TextFormatter extends Formatter
     }
 
     /**
-     *
      * @return Default unit for it's corresponding nutrient type from getDefaultShownNutrients()
      */
     public static List<NutrientQuantity.Unit> getDefaultUnits()
@@ -251,6 +249,24 @@ public class TextFormatter extends Formatter
             return new SimpleDateFormat("dd").format(calendar.getTime()) + " " + month;
         } else
             return new SimpleDateFormat("dd.MM.yyyy").format(calendar.getTime());
+    }
+
+    /**
+     * @param record
+     * @return Entries from record, numbered from 1 to n
+     */
+    public String formatNumbered(DailyRecord record)
+    {
+        TextMatrix entriesNumbered = new TextMatrix(3, record.getEntryCount() + 1);
+        entriesNumbered.setRow(0, new String[]{"#", "AMOUNT", "NAME"});
+
+        for (int i = 1; i < record.getEntryCount() + 1; i++)
+        {
+            entriesNumbered.setRow(i, new String[]{Integer.toString(i), format(record.getEntry(i - 1).getAmount()),
+                    record.getEntry(i - 1).getDescription()});
+        }
+
+        return entriesNumbered.formatToString();
     }
 
     @Override

@@ -230,6 +230,9 @@ public class Console
                     recordManager.saveRecord(dailyRecord);
                     if (autoreport)
                         report();
+                } else if (input.equals("delete") || input.equals("remove"))
+                {
+                    delete();
                 } else if (input.startsWith("switch "))
                 {
                     String expression = input.substring("switch ".length());
@@ -265,6 +268,53 @@ public class Console
                 e.printStackTrace();
             }
         }
+    }
+
+    private void delete()
+    {
+        if (dailyRecord.getEntryCount() == 0)
+        {
+            System.out.println("Error: current record is empty!");
+            return;
+        }
+
+        // print entries with numbers
+        System.out.println(formatter.formatNumbered(dailyRecord));
+        System.out.println("# you want to delete: ");
+        Scanner scanner = new Scanner(System.in);
+        int number = -1;
+        boolean bad = false;
+        do
+        {
+            String str = scanner.nextLine();
+            if (str.equals("esc"))
+                return;
+            else
+            {
+                try
+                {
+                    number = Integer.parseInt(str);
+                    bad = !(number >= 1 && number <= dailyRecord.getEntryCount());
+                } catch (NumberFormatException e)
+                {
+                    bad = true;
+                }
+
+                if (bad)
+                    System.out.println("Invalid command. Type in a number from 1 to " + dailyRecord.getEntryCount() + " or \"esc\"");
+            }
+        } while (bad);
+
+        createMemento();
+
+        // remove!
+        String f = formatter.format(dailyRecord.getEntry(number - 1));
+        dailyRecord.remove(dailyRecord.getEntry(number - 1).getId());
+        recordManager.saveRecord(dailyRecord);
+        System.out.println("Removed " + f);
+
+        if (autoreport)
+            report();
     }
 
     private void ratio()
