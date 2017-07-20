@@ -832,7 +832,15 @@ public class Console
         try
         {
             // first try to parse direct input
-            DirectSpecification directSpecification = new DirectInputExpressionParser().parse(input);
+            DirectSpecification directSpecification;
+            try
+            {
+                directSpecification = new DirectInputExpressionParser().parse(input);
+            } catch (ParseException e)
+            {
+                directSpecification = null;
+            }
+
             if (directSpecification != null)
             {
                 directFoodInput(directSpecification);
