@@ -18,7 +18,7 @@ public class SearchEvaluation
 {
     private LocalSearchHistory hist = new LocalSearchHistory();
 
-    private LocalUSDAFoodDatabase db = new LocalUSDAFoodDatabase(false);    // don't use search history
+    private LocalUSDAFoodDatabase db = new LocalUSDAFoodDatabase();    // don't use search history
 
     public void evaluateWithHistory() throws FileNotFoundException
     {

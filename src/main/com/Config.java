@@ -2,5 +2,5 @@ package com;
 
 public class Config
 {
-    public static boolean DEBUG = true;
+    public static boolean DEBUG = false;
 }

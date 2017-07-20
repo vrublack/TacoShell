@@ -42,7 +42,7 @@ public class Console
             System.out.println("Invalid number of arguments. You can specify the food source by \"usda\" or \"fatsecret\"");
 
         if (console.dataSource == null)
-            console.dataSource = new LocalUSDAFoodDatabase(!Config.DEBUG);
+            console.dataSource = new LocalUSDAFoodDatabase();
 
 
         console.formatter = readIniFile();
@@ -514,7 +514,7 @@ public class Console
                 System.out.println("Data source switched to FatSecret API");
                 break;
             case "usda":
-                dataSource = new LocalUSDAFoodDatabase(!Config.DEBUG);
+                dataSource = new LocalUSDAFoodDatabase();
                 System.out.println("Data source switched to USDA Database");
                 break;
             default:

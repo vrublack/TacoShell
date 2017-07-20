@@ -1,5 +1,6 @@
 package com.vrublack.nutrition.core.usda;
 
+import com.vrublack.nutrition.console.LocalSearchHistory;
 import com.vrublack.nutrition.core.*;
 import com.vrublack.nutrition.core.CanonicalSearchableFoodItem;
 import com.vrublack.nutrition.core.search.DescriptionBase;
@@ -27,9 +28,13 @@ public abstract class USDAFoodDatabase implements SyncFoodDataSource
 
     private FoodSearch search;
 
+    private SearchHistory searchHistory;
+
     public USDAFoodDatabase()
     {
         parseAsciiFile(null, 0);
+
+        searchHistory = new LocalSearchHistory();
 
         try
         {
@@ -44,6 +49,8 @@ public abstract class USDAFoodDatabase implements SyncFoodDataSource
     public USDAFoodDatabase(Runnable onStatusUpdate, float percentagInterval)
     {
         parseAsciiFile(onStatusUpdate, percentagInterval);
+
+        searchHistory = new LocalSearchHistory();
 
         try
         {
@@ -60,8 +67,10 @@ public abstract class USDAFoodDatabase implements SyncFoodDataSource
      *
      * @return Search history to be used
      */
-    // design pattern: template method
-    protected abstract SearchHistory getSearchHistory();
+    public SearchHistory getSearchHistory()
+    {
+        return searchHistory;
+    }
 
     /**
      * @return BufferedReader that points to the USDA ascii file
@@ -70,7 +79,6 @@ public abstract class USDAFoodDatabase implements SyncFoodDataSource
     public abstract BufferedReader getBufferedReader() throws FileNotFoundException;
 
     /**
-     *
      * @return Description base for hash search
      */
     // design pattern: template method
