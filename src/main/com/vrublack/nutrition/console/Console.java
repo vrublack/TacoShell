@@ -185,9 +185,6 @@ public class Console
                 } else if (input.equals("report"))
                 {
                     report();
-                } else if (input.equals("ratio"))
-                {
-                    ratio();
                 } else if (input.startsWith("last"))
                 {
                     String expression = input.substring("last ".length());
@@ -315,14 +312,6 @@ public class Console
 
         if (autoreport)
             report();
-    }
-
-    private void ratio()
-    {
-        float[] ratios = dailyRecord.calculateMacroRatio();
-        System.out.println("The ratio for today is " + formatter.format(ratios[0]) + "% carbs, "
-                + formatter.format(ratios[1]) + "% fat, "
-                + formatter.format(ratios[2]) + "% protein (in terms of calories)");
     }
 
     private void last(int days)

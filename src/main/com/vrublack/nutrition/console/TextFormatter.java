@@ -150,7 +150,7 @@ public class TextFormatter extends Formatter
     public String format(DailyRecord dailyRecord)
     {
         // + 4 for header, 2 blank lines and total stats
-        final int matrixHeight = dailyRecord.getEntryCount() + 4;
+        final int matrixHeight = dailyRecord.getEntryCount() + 5;
         final int matrixWidth = shownNutrients.size() + 4;
 
         List<String> emptyLineArray = new ArrayList<>();
@@ -223,6 +223,7 @@ public class TextFormatter extends Formatter
 
         matrix.setRow(dailyRecord.getEntryCount() + 2, emptyLine);
 
+        // TOTAL row
         List<String> totalStatsRow = new ArrayList<>();
         totalStatsRow.add("TOTAL");
         totalStatsRow.add("");
@@ -234,8 +235,52 @@ public class TextFormatter extends Formatter
             Specification.NutrientType type = shownNutrients.get(i);
             totalStatsRow.add(format(totals.get(i)) + " " + format(desiredUnits.get(i)));
         }
-
         matrix.setRow(dailyRecord.getEntryCount() + 3, totalStatsRow.toArray(new String[totalStatsRow.size()]));
+
+        // RATIO row
+        List<String> ratioRow = new ArrayList<>();
+        ratioRow.add("RATIO");
+        ratioRow.add("");
+        ratioRow.add("");
+        ratioRow.add("100%");
+        float totalKcal = specificationList.getTotalKcal();
+        for (int i = 0; i < shownNutrients.size(); i++)
+        {
+            Specification.NutrientType type = shownNutrients.get(i);
+            float kcal;
+            switch (type)
+            {
+                case Fat:
+                case FatMonounsaturated:
+                case FatPolyunsaturated:
+                case FatSaturated:
+                case FatTrans:
+                    kcal = totals.get(i) * 9;
+                    break;
+                case Carbohydrates:
+                case Sugar:
+                case Protein:
+                    kcal = totals.get(i) * 4;
+                    break;
+                default:
+                    kcal = -1;
+            }
+
+            String percentStr;
+            if (kcal == -1)
+                percentStr = "";
+            else
+            {
+                float percent;
+                if (totalKcal == 0)
+                    percent = 0;
+                else
+                    percent = kcal / totalKcal * 100;
+                percentStr = format(percent) + " %";
+            }
+            ratioRow.add(percentStr);
+        }
+        matrix.setRow(dailyRecord.getEntryCount() + 4, ratioRow.toArray(new String[ratioRow.size()]));
 
         String dateStr = format(RecordManager.getCalendar(dailyRecord.getDate()), false);
         return "Report for " + dateStr + ":\n\n" + matrix.formatToString();
