@@ -32,6 +32,9 @@ public class Console
 
     private TextFormatter formatter;
 
+    private boolean autoreport;
+
+
     public static void main(String[] args)
     {
         Console console = new Console();
@@ -45,12 +48,12 @@ public class Console
             console.dataSource = new LocalUSDAFoodDatabase();
 
 
-        console.formatter = readIniFile();
+        console.readIniFile();
 
         console.startInputLoop();
     }
 
-    private static TextFormatter readIniFile()
+    private void readIniFile()
     {
         List<Specification.NutrientType> nutrientTypes = null;
         List<NutrientQuantity.Unit> units = null;
@@ -60,6 +63,11 @@ public class Console
             Ini ini = new Ini(new File(INI_FILENAME));
             Ini.Section display = ini.get("display");
             String[] showNutrients = display.get("show").split(",");
+            String autoreport_str = display.get("autoreport");
+            if (autoreport_str != null)
+                autoreport = Boolean.valueOf(autoreport_str);
+            else
+                autoreport = false;
             nutrientTypes = new ArrayList<>();
             units = new ArrayList<>();
             for (String value : showNutrients)
@@ -137,7 +145,7 @@ public class Console
             }
         }
 
-        return new TextFormatter(nutrientTypes, units);
+        formatter = new TextFormatter(nutrientTypes, units);
     }
 
     private void startInputLoop()
@@ -172,7 +180,8 @@ public class Console
                 if (input.equals("undo"))
                 {
                     undo();
-                    report();
+                    if (autoreport)
+                        report();
                 } else if (input.equals("report"))
                 {
                     report();
@@ -187,22 +196,26 @@ public class Console
                 {
                     String expression = input.substring("add ".length());
                     foodInput(expression, false, false);
-                    report();
+                    if (autoreport)
+                        report();
                 } else if (input.startsWith("addm "))   // "add micronutrients"
                 {
                     String expression = input.substring("add ".length());
                     foodInput(expression, false, true);
-                    report();
+                    if (autoreport)
+                        report();
                 } else if (input.startsWith("a ")) // "quick add"
                 {
                     String expression = input.substring("a ".length());
                     foodInput(expression, true, false);
-                    report();
+                    if (autoreport)
+                        report();
                 } else if (input.startsWith("am ")) // "quick add micronutrients"
                 {
                     String expression = input.substring("a ".length());
                     foodInput(expression, true, true);
-                    report();
+                    if (autoreport)
+                        report();
                 } else if (input.equals("create"))
                 {
                     create();
@@ -215,12 +228,14 @@ public class Console
                     createMemento();
                     dailyRecord.clear();
                     recordManager.saveRecord(dailyRecord);
-                    report();
+                    if (autoreport)
+                        report();
                 } else if (input.startsWith("switch "))
                 {
                     String expression = input.substring("switch ".length());
                     switchRecord(expression);
-                    report();
+                    if (autoreport)
+                        report();
                 } else if (input.startsWith("source "))
                 {
                     String expression = input.substring("source ".length());
