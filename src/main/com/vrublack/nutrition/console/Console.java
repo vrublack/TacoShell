@@ -492,47 +492,55 @@ public class Console
         return newId;
     }
 
+
     private void help(String s)
     {
-        final String[] commands = {"ADD", "ADDM", "A", "AM", "CREATE", "SEARCH", "REPORT", "SWITCH", "CLEAR", "UNDO", "SOURCE", "HELP"};
-
-        final String[] commandExplanations = {"Adds item to the record.", "Like ADD, but only adds micronutrients.", "Adds best matching item to the record without giving a choice.",
-                "Like A, but only adds micronutrients.", "Add new item to the database locally.",
-                "Displays matching items.", "Shows added items for the current record.", "Switches current record.", "Deletes all entries in the current record.",
-                "Undoes last action.", "Switches the current data source.", "Shows help."};
-
-        final String[] commandExplanationsDetailed = {
-                // ADD
-                "[quantity] [item]\n\tquantity:\tHow much of the item should be added, e.g. \"2.5 tbsp\" or \"150g\" or \"large\". " +
+        final String[][] commands = {
+                {
+                        "ADD", "Adds item to the record.", "[quantity] [item]\n\tquantity:\tHow much of the item should be added, e.g. \"2.5 tbsp\" or \"150g\" or \"large\". " +
                         "\n\t\t\tFor some items, an implicit quantity can be used if no quantity is specified, for example, \"ADD tomato\" would be interpreted as one tomato.\n\t\t\t" +
                         "The supported units depend on the data source and the specific item.\n" +
                         "\titem:\tEither a term that should be searched in the data source, like potatoes, or a specific nutrient (only cal, carbs, protein and fat are currently supported).\n\t\t\t" +
-                        "When specifying the nutrients directly, multiple nutrients can be added in a single command, like \"ADD 10g carbs, 24g fat\". You can also write * [factor] at the end" +
-                        "of the line to multiply every specified nutrient by this number.",
-                // ADDM
-                "(see ADD)",
-                // A
-                "(see ADD)",
-                // AM,
-                "(see ADD)",
-                // CREATE,
-                "(no arguments)",
-                // SEARCH
-                "[term]\n\tterm:\tA string that should be searched for in the data source.",
-                // REPORT
-                "(no arguments)",
-                // SWITCH
-                "[date term]\n\tdate term:\tTerm specifying a date. Either \"today\", \"yesterday\", a weekday, \"prev\", \"next\"," +
-                        "\n\t\t\t\tor a date in the following formats: \"dd.MM.yyyy\", \"dd.MM\", \"MM/dd/yyyy\", \"MM/dd\"",
-                // CLEAR
-                "(no arguments)",
-                // UNDO
-                "(no arguments)",
-                // SOURCE
-                "[source]\n\tsource:\t\"USDA\" (http://www.ars.usda.gov/Services/docs.htm?docid=24936) or \"FatSecret\" (https://www.fatsecret.com)",
-                // HELP
-                "[command]\n\tcommand:\tCommand to show options for"
-
+                        "When specifying the nutrients directly, multiple nutrients can be added in a single command, like \"ADD 10g carbs, 24g fat\". \n\t\t\tYou can also write * [factor] at the end" +
+                        "of the line to multiply every specified nutrient by this number."
+                },
+                {
+                        "ADDM", "Like ADD, but only adds micronutrients.", "(see ADD)"
+                },
+                {
+                        "A", "Adds best matching item to the record without giving a choice.", "(see ADD)"
+                },
+                {
+                        "AM", "Like A, but only adds micronutrients.", "(see ADD)"
+                },
+                {
+                        "CREATE", "Add new item to the database locally.", "(no arguments)",
+                },
+                {
+                        "SEARCH", "Displays matching items.", "[term]\n\tterm:\tA string that should be searched for in the data source."
+                },
+                {
+                        "REPORT", "Shows added items for the current record.", "(no arguments)"
+                },
+                {
+                        "SWITCH", "Switches current record.", "[date term]\n\tdate term:\tTerm specifying a date. Either \"today\", \"yesterday\", a weekday, \"prev\", \"next\"," +
+                        "\n\t\t\t\tor a date in the following formats: \"dd.MM.yyyy\", \"dd.MM\", \"MM/dd/yyyy\", \"MM/dd\""
+                },
+                {
+                        "CLEAR", "Deletes all entries in the current record.", "(no arguments)"
+                },
+                {
+                        "UNDO", "Undoes last action.", "(no arguments)"
+                },
+                {
+                        "REMOVE", "Lets you select an item to remove", "(no arguments)"
+                },
+                {
+                        "SOURCE", "Switches the current data source.", "[source]\n\tsource:\t\"USDA\" (http://www.ars.usda.gov/Services/docs.htm?docid=24936) or \"FatSecret\" (https://www.fatsecret.com)"
+                },
+                {
+                        "HELP", "Shows help.", "[command]\n\tcommand:\tCommand to show options for"
+                }
 
         };
 
@@ -544,7 +552,7 @@ public class Console
 
             for (int i = 0; i < commands.length; i++)
             {
-                matrix.setRow(i, new String[]{commands[i], commandExplanations[i]});
+                matrix.setRow(i, new String[]{commands[i][0], commands[i][1]});
             }
 
             System.out.println(matrix.formatToString());
@@ -553,7 +561,7 @@ public class Console
             int index = -1;
             for (int i = 0; i < commands.length; i++)
             {
-                if (commands[i].equalsIgnoreCase(s))
+                if (commands[i][0].equalsIgnoreCase(s))
                 {
                     index = i;
                     break;
@@ -564,7 +572,7 @@ public class Console
                 System.out.println("Unknown command!");
                 return;
             }
-            System.out.println("Syntax: " + commandExplanationsDetailed[index]);
+            System.out.println("Syntax: " + commands[index][2]);
         }
     }
 
