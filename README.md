@@ -1,6 +1,6 @@
 # Introduction
 
-This command-line tool lets you track what you eat during the day. As there are many commercial website that do exactly that, here are some advantages of TacoShell:
+This command-line tool written in Java lets you track what you eat during the day. As there are many commercial website that do exactly that, here are some advantages of TacoShell:
 
 * It is extremely quick to use. Instead of clicking through menus, you can just type `add 340g chicken breast`.
 
