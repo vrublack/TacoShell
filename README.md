@@ -1,32 +1,27 @@
 # Introduction
 
-This project helps you <b>track your calories and nutrients many times faster</b> than most calorie tracking websites allow.
+This command-line tool lets you track what you eat during the day. As there are many commercial website that do exactly that, here are some advantages of TacoShell:
 
-You can add a specific food item, like potatos, or add nutrients directly.
+* It is extremely quick to use. Instead of clicking through menus, you can just type `add 340g chicken breast`.
 
-A few <b>sample inputs</b>:
+* It works offline which is good from a privacy and reliability standpoint. (To have your data on multiple devices, you can put it in your Dropbox, Onedrive etc. folder so it'll automatically sync.)
 
-* add 340g chicken breast <br/>
-* add 1.5 cup of milk <br/>
-* add 2 tbsp of olive oil <br/>
-* add tomato <i>(which is interpreted as 1 tomato)</i> <br/>
-* add 350 calories <br/>
-* add 45g carbs, 20g protein <br/>
+* You can modify and extend it all you want. For example, I added code to scrape the website of my university dining hall.
 
 
 # Setup & Getting Started
 
-There might be a bit of a learning curve to this app, but be assured that it is worth it. Here are a few things to get started:
+I will say that there is a bit of a learning curve to using this app, but be assured that it is super simple once you remember a few commands. Here are a few things to get started:
 
-* The app runs in the console. To make things easier, you can use a .bat file under Windows (there's a sample file included in the release) or a .command file under Mac OS to change into the directory and call "java -jar TacoShell.jar"
+* The app runs in the console. To make things easier, you can use a `.bat` file under Windows (there's a sample file included in the release) or a `.command` file under Mac OS to change into the directory and call `java -jar TacoShell.jar`
 * There are several simple commands to add and remove items or to switch to a different day.
-  * <b>add [quantity] [food]</b>, eg. add <i>200g chicken breast</i>). This searches in the current database (USDA by default for [food]). You can use various units like <i>g, kg, oz, ml, cups</i>... and for some foods also just a number (<i>2 tomatoes</i>). It is even possible to use kcal as your quantity in which case that many calories worth of the food is added.
-  * <b>a</b> does the same but automatically chooses the best match without prompting you.
-  * You can also use either <i>add</i> or <i>a</i> to enter micronutrients, macronutrients or calories directly, such as <i>a 20mg Vitamin C</i>, or <i>a 250 kcal</i>. You can add multiple ones at once, like <i>a 20g carbs, 30g fat, 15g protein</i>.
-  * It is possible to use a multiplier in the end of the add command, like <i>add 30g carbs * 2.5</i>.
-* Use the <b>report</b> command to see what you've eaten during the day. You can configure the nutrients to show and their respective units in the file preferences.ini. In this file, you can also choose to have the report shown after every command that changes it.
+  * `add [quantity] [food]`, eg. add `200g chicken breast`). This searches in the current database (USDA by default for [food]). You can use various units like <i>g, kg, oz, ml, cups</i>... and for some foods also just a number (<i>2 tomatoes</i>). It is even possible to use kcal as your quantity in which case that many calories worth of the food is added.
+  * `a [quantity] [food]` does the same but automatically chooses the best match without prompting you.
+  * You can also use either `add` or `a` to enter micronutrients, macronutrients or calories directly, such as `a 20mg Vitamin C`, or `a 250 kcal`. You can add multiple ones at once, like `a 20g carbs, 30g fat, 15g protein`.
+  * It is possible to use a multiplier in the end of the add command, like `add 30g carbs * 2.5`.
+* Use the `report` command to see what you've eaten during the day. You can configure the nutrients to show and their respective units in the file `preferences.ini`. In this file, you can also choose to have the report shown after every command that changes it.
 
-You can type <b>"help"</b> for a list of all commands and a detailed explanation of them.
+You can type `help` for a list of all commands and a detailed explanation of them.
 
 # Data Sources
 
