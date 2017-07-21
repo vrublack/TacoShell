@@ -1,8 +1,6 @@
 # Introduction
 
-This project features the core functionality of my website [tacoshell.io](http://nutrition-tracker.appspot.com) in a standalone, text-based Java application.
-
-It helps you <b>track your calories and nutrients many times faster</b> than most calorie tracking websites allow.
+This project helps you <b>track your calories and nutrients many times faster</b> than most calorie tracking websites allow.
 
 You can add a specific food item, like potatos, or add nutrients directly.
 
@@ -16,7 +14,19 @@ A few <b>sample inputs</b>:
 * add 45g carbs, 20g protein <br/>
 
 
-You can type <b>"help"</b> for a list of all commands.
+# Setup & Getting Started
+
+There might be a bit of a learning curve to this app, but be assured that it is worth it. Here are a few things to get started:
+
+* The app runs in the console. To make things easier, you can use a .bat file under Windows (there's a sample file included in the release) or a .command file under Mac OS to change into the directory and call "java -jar TacoShell.jar"
+* There are several simple commands to add and remove items or to switch to a different day.
+  * <b>add [quantity] [food]</b>, eg. add <i>200g chicken breast</i>). This searches in the current database (USDA by default for [food]). You can use various units like <i>g, kg, oz, ml, cups</i>... and for some foods also just a number (<i>2 tomatoes</i>). It is even possible to use kcal as your quantity in which case that many calories worth of the food is added.
+  * <b>a</b> does the same but automatically chooses the best match without prompting you.
+  * You can also use either <i>add</i> or <i>a</i> to enter micronutrients, macronutrients or calories directly, such as <i>a 20mg Vitamin C</i>, or <i>a 250 kcal</i>. You can add multiple ones at once, like <i>a 20g carbs, 30g fat, 15g protein</i>.
+  * It is possible to use a multiplier in the end of the add command, like <i>add 30g carbs * 2.5</i>.
+* Use the <b>report</b> command to see what you've eaten during the day. You can configure the nutrients to show and their respective units in the file preferences.ini. In this file, you can also choose to have the report shown after every command that changes it.
+
+You can type <b>"help"</b> for a list of all commands and a detailed explanation of them.
 
 # Data Sources
 
@@ -28,7 +38,7 @@ but also contains a metric indicating how common this food is which I calculated
 in order to improve search results. 
 
 * The FatSecret API lets you have access to the database of [FatSecret.com](https://www.fatsecret.com). It is much larger than the USDA db, and 
-the description of the entries tend to be cleaner and less verbose. However, I have found that some important entries are part of USDA but not of FatSecret, e.g. 3.7% milk.
+the description of the entries tend to be cleaner and less verbose. You have to sign up for your own API key, though.
 Unfortunately, the country-specific FatSecret-databases are not supported.
 
 * You can also define your own food items which are stored locally.
@@ -36,5 +46,6 @@ Unfortunately, the country-specific FatSecret-databases are not supported.
 
 # tacoshell.io
 
-I use GWT to compile many classes from this project to javascript for my website [tacoshell.io](http://nutrition-tracker.appspot.com), so it's no surprise that both behave fairly similarly. 
-However, I have decided not to release the website's source for now.
+I use GWT to compile many classes from this project to javascript for my website [tacoshell.io](http://nutrition-tracker.appspot.com), so it's no surprise that both behave fairly similarly. I would recommend against using the website for anything other than trying out a few things since it is still fairly unstable/buggy.
+
+I have decided not to release the website's source for now.
