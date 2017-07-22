@@ -121,6 +121,11 @@ public class TextFormatter extends Formatter
             }
         }
 
+        if (comps.isEmpty())
+        {
+            comps.add(format(specification.getCalories()) + " kcal");
+        }
+
         String result = "";
         for (int i = 0; i < comps.size(); i++)
         {
