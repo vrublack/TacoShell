@@ -41,6 +41,6 @@ Unfortunately, the country-specific FatSecret-databases are not supported.
 
 # tacoshell.io
 
-I use GWT to compile many classes from this project to javascript for my website [tacoshell.io](http://nutrition-tracker.appspot.com), so it's no surprise that both behave fairly similarly. I would recommend against using the website for anything other than trying out a few things since it is still fairly unstable/buggy.
+I use GWT to compile many classes from this project to javascript for my website [tacoshell.io](http://nutrition-tracker.appspot.com), so it's no surprise that both behave fairly similarly. 
 
 I have decided not to release the website's source for now.
