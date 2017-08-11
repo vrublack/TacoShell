@@ -23,10 +23,10 @@ public class CompositeFoodSource implements SyncFoodDataSource
     }
 
     @Override
-    public List<SearchResultItem> search(String searchStr)
+    public List<SearchResultItem> search(String searchStr, SearchHistory history)
     {
-        List<SearchResultItem> leftResults = left.search(searchStr);
-        List<SearchResultItem> rightResults = right.search(searchStr);
+        List<SearchResultItem> leftResults = left.search(searchStr, history);
+        List<SearchResultItem> rightResults = right.search(searchStr, history);
 
         List<SearchResultItem> all = new ArrayList<>();
         all.addAll(leftResults);
@@ -50,11 +50,11 @@ public class CompositeFoodSource implements SyncFoodDataSource
     }
 
     @Override
-    public FoodItem retrieve(String id)
+    public FoodItem retrieve(String id, SearchHistory history)
     {
-        FoodItem item = left.retrieve(id);
+        FoodItem item = left.retrieve(id, history);
         if (item == null)
-            item = right.retrieve(id);
+            item = right.retrieve(id, history);
         return item;
     }
 

@@ -1,8 +1,6 @@
 package com.vrublack.nutrition.core;
 
 
-import com.Config;
-
 import java.io.Serializable;
 
 public abstract class FoodItem implements Serializable

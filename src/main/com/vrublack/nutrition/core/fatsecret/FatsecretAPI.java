@@ -67,7 +67,7 @@ public class FatsecretAPI implements SyncFoodDataSource
     }
 
     @Override
-    public List<SearchResultItem> search(String searchStr)
+    public List<SearchResultItem> search(String searchStr, SearchHistory history)
     {
         try
         {
@@ -130,7 +130,7 @@ public class FatsecretAPI implements SyncFoodDataSource
     }
 
     @Override
-    public FatSecretFoodItem retrieve(String id)
+    public FatSecretFoodItem retrieve(String id, SearchHistory history)
     {
         try
         {
@@ -148,7 +148,7 @@ public class FatsecretAPI implements SyncFoodDataSource
     public FoodItem get(String id)
     {
         // implementation same as retrieve, since there is no search history in this case
-        return retrieve(id);
+        return retrieve(id, null);
     }
 
     private FatSecretFoodItem parseFoodItem(String s)

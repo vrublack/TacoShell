@@ -2,7 +2,6 @@ package com.vrublack.nutrition.core;
 
 
 import com.google.gwt.user.client.rpc.IsSerializable;
-import com.vrublack.nutrition.core.FoodItem;
 
 import java.io.Serializable;
 

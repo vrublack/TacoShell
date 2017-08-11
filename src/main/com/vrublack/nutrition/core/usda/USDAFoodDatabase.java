@@ -1,12 +1,9 @@
 package com.vrublack.nutrition.core.usda;
 
-import com.vrublack.nutrition.console.LocalSearchHistory;
 import com.vrublack.nutrition.core.*;
-import com.vrublack.nutrition.core.CanonicalSearchableFoodItem;
 import com.vrublack.nutrition.core.search.DescriptionBase;
 import com.vrublack.nutrition.core.search.FoodSearch;
 import com.vrublack.nutrition.core.search.HashFoodSearch;
-import com.vrublack.nutrition.core.SearchableFoodItem;
 import com.vrublack.nutrition.core.search.LevenshteinFoodSearch;
 
 import java.io.BufferedReader;
@@ -28,21 +25,17 @@ public abstract class USDAFoodDatabase implements SyncFoodDataSource
 
     private FoodSearch search;
 
-    private SearchHistory searchHistory;
-
     public USDAFoodDatabase()
     {
         parseAsciiFile(null, 0);
 
-        searchHistory = new LocalSearchHistory();
-
         try
         {
-            search = new HashFoodSearch(getCanonicalSearchableFoodItems(), getSearchHistory(), getDescriptionBase());
+            search = new HashFoodSearch(getCanonicalSearchableFoodItems(), getDescriptionBase());
         } catch (FileNotFoundException e)
         {
             e.printStackTrace();
-            search = new LevenshteinFoodSearch(getSearchableFoodItems(), getSearchHistory());
+            search = new LevenshteinFoodSearch(getSearchableFoodItems());
         }
     }
 
@@ -50,26 +43,14 @@ public abstract class USDAFoodDatabase implements SyncFoodDataSource
     {
         parseAsciiFile(onStatusUpdate, percentagInterval);
 
-        searchHistory = new LocalSearchHistory();
-
         try
         {
-            search = new HashFoodSearch(getCanonicalSearchableFoodItems(), getSearchHistory(), getDescriptionBase());
+            search = new HashFoodSearch(getCanonicalSearchableFoodItems(), getDescriptionBase());
         } catch (FileNotFoundException e)
         {
             e.printStackTrace();
-            search = new LevenshteinFoodSearch(getSearchableFoodItems(), getSearchHistory());
+            search = new LevenshteinFoodSearch(getSearchableFoodItems());
         }
-    }
-
-    /**
-     * Called on every interaction
-     *
-     * @return Search history to be used
-     */
-    public SearchHistory getSearchHistory()
-    {
-        return searchHistory;
     }
 
     /**
@@ -281,9 +262,9 @@ public abstract class USDAFoodDatabase implements SyncFoodDataSource
 
 
     @Override
-    public List<SearchResultItem> search(String searchStr)
+    public List<SearchResultItem> search(String searchStr, SearchHistory history)
     {
-        return search(searchStr, search);
+        return search(searchStr, search, history);
     }
 
     public List<CanonicalSearchableFoodItem> getCanonicalSearchableFoodItems()
@@ -300,15 +281,15 @@ public abstract class USDAFoodDatabase implements SyncFoodDataSource
         return searchableFoodItems;
     }
 
-    public List<SearchResultItem> search(String searchStr, FoodSearch search)
+    public List<SearchResultItem> search(String searchStr, FoodSearch search, SearchHistory history)
     {
         lastSearchStr = searchStr;
-        return search.searchFood(searchStr);
+        return search.searchFood(searchStr, history);
     }
 
 
     @Override
-    public FoodItem retrieve(String id)
+    public FoodItem retrieve(String id, SearchHistory history)
     {
         for (FoodItem foodItem : entries)
             if (foodItem.getId().equals(id))
@@ -316,7 +297,7 @@ public abstract class USDAFoodDatabase implements SyncFoodDataSource
                 // update search feedback
                 if (lastSearchStr != null)
                 {
-                    getSearchHistory().putNDBNumberForSearchResult(lastSearchStr, id);
+                    history.putNDBNumberForSearchResult(lastSearchStr, id);
                     lastSearchStr = null;
                 }
 

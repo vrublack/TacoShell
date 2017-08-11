@@ -5,7 +5,6 @@ import com.swabunga.spell.engine.Word;
 import com.swabunga.spell.event.SpellChecker;
 import org.tartarus.snowball.ext.englishStemmer;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;

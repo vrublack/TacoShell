@@ -1,6 +1,8 @@
 package com.vrublack.nutrition.core.util;
 
-import java.io.*;
+import java.io.FileNotFoundException;
+import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
 
 public class Debug
 {

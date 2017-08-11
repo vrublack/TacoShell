@@ -2,7 +2,6 @@ package com.vrublack.nutrition.core.usda;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
 import com.vrublack.nutrition.core.*;
-import com.vrublack.nutrition.core.CanonicalSearchableFoodItem;
 
 import java.io.Serializable;
 import java.util.Map;

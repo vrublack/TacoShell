@@ -3,6 +3,7 @@ package com.vrublack.nutrition.core;
 import com.google.gwt.user.client.rpc.IsSerializable;
 
 import java.io.Serializable;
+import java.util.Date;
 
 public class SimpleCalendar implements Serializable, IsSerializable, Comparable<SimpleCalendar>
 {
@@ -22,6 +23,15 @@ public class SimpleCalendar implements Serializable, IsSerializable, Comparable<
         this.year = year;
         this.hour = hour;
         this.minute = minute;
+    }
+
+    /**
+     * @return Very late date. It is not the latest possible date, but the year is the maximum value.
+     */
+    public static SimpleCalendar inf()
+    {
+        int inf = Integer.MAX_VALUE;
+        return new SimpleCalendar(1, 1, inf, 1, 1);
     }
 
     public SimpleCalendar()
@@ -85,6 +95,16 @@ public class SimpleCalendar implements Serializable, IsSerializable, Comparable<
     public String format()
     {
         return zeroPrefix(year, 4) + "-" + zeroPrefix(month, 2) + "-" + zeroPrefix(day, 2);
+    }
+
+    /**
+     * @return Date in format yyyy-MM-dd hh:mm
+     */
+    public String fullFormat()
+    {
+        return zeroPrefix(year, 4) + "-" + zeroPrefix(month, 2) + "-" + zeroPrefix(day, 2)
+                + " " + zeroPrefix(hour, 2) + ":" + zeroPrefix(minute, 2);
+
     }
 
     @Override

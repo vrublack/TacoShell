@@ -1,9 +1,7 @@
 package com.vrublack.nutrition.core;
 
 
-import com.Config;
 import com.google.gwt.user.client.rpc.IsSerializable;
-import com.vrublack.nutrition.core.util.Debug;
 
 import java.io.Serializable;
 

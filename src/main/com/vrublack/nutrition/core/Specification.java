@@ -4,9 +4,7 @@ import com.google.gwt.user.client.rpc.IsSerializable;
 
 import java.io.Serializable;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * Represents a specific amount of foodItem
@@ -134,6 +132,10 @@ public abstract class Specification implements IsSerializable, Serializable
             return null;
     }
 
+    /**
+     *
+     * @return ID specific to this Specification (not to the food item)
+     */
     public abstract String getId();
 
     public abstract float getCalories();

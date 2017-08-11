@@ -16,21 +16,19 @@ public class LevenshteinFoodSearch implements FoodSearch
 
     private List<SearchableFoodItem> entries;
 
-    private SearchHistory searchHistory;
 
-
-    public LevenshteinFoodSearch(List<SearchableFoodItem> entries, SearchHistory searchHistory)
+    public LevenshteinFoodSearch(List<SearchableFoodItem> entries)
     {
         this.entries = entries;
-        this.searchHistory = searchHistory;
     }
 
-    public List<SearchResultItem> searchFood(String searchString)
+    @Override
+    public List<SearchResultItem> searchFood(String searchString, SearchHistory history)
     {
         String ndbNumber = null;
-        if (searchHistory != null)
+        if (history != null)
         {
-            ndbNumber = searchHistory.getNDBNumberForSearchResult(searchString);
+            ndbNumber = history.getNDBNumberForSearchResult(searchString);
         }
 
         // parse sorted components of the description

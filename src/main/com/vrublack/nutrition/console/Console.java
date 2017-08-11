@@ -32,6 +32,8 @@ public class Console
 
     private TextFormatter formatter;
 
+    private SearchHistory history = new LocalSearchHistory();
+
     private boolean autoreport;
 
 
@@ -762,7 +764,7 @@ public class Console
 
     private void search(String description)
     {
-        List<SearchResultItem> results = new CompositeFoodSource(dataSource, userFoodDatabase).search(description);
+        List<SearchResultItem> results = new CompositeFoodSource(dataSource, userFoodDatabase).search(description, history);
         printSearchResults(results);
     }
 
@@ -850,13 +852,13 @@ public class Console
                 FoodInputExpression foodInputExpression = new FoodInputExpressionParser().parse(input);
 
                 // search for foodItem in the database
-                List<SearchResultItem> results = new CompositeFoodSource(dataSource, userFoodDatabase).search(foodInputExpression.getDescription());
+                List<SearchResultItem> results = new CompositeFoodSource(dataSource, userFoodDatabase).search(foodInputExpression.getDescription(), history);
                 if (results.isEmpty())
                 {
                     System.out.println("No matches were found in the database. Consider adding the nutrients directly, like \"add 75g protein, 30g carbs\"");
                 } else if (quickAdd)
                 {
-                    FoodItem item = new CompositeFoodSource(dataSource, userFoodDatabase).retrieve(results.get(0).getId());
+                    FoodItem item = new CompositeFoodSource(dataSource, userFoodDatabase).retrieve(results.get(0).getId(), history);
                     quickAddFood(foodInputExpression, item, microNutrientsOnly);
                 } else
                 {
@@ -961,7 +963,7 @@ public class Console
                     System.out.println("Invalid input; " + prompt);
                 } else
                 {
-                    FoodItem foodItem = new CompositeFoodSource(dataSource, userFoodDatabase).retrieve(results.get(number - 1).getId());
+                    FoodItem foodItem = new CompositeFoodSource(dataSource, userFoodDatabase).retrieve(results.get(number - 1).getId(), history);
                     try
                     {
                         createMemento();

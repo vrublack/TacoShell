@@ -23,6 +23,7 @@ public abstract class RecordManager
 
     public abstract void saveRecord(DailyRecord record);
 
+
     /**
      * @return Record for today. Creates new one if it doesn't exist.
      */
@@ -201,11 +202,12 @@ public abstract class RecordManager
 
     public static Calendar getCalendar(SimpleCalendar simpleCalendar)
     {
-        Calendar calendar = new GregorianCalendar();
-        calendar.set(Calendar.DAY_OF_MONTH, simpleCalendar.getDay());
-        calendar.set(Calendar.MONTH, simpleCalendar.getMonth() - 1);    // month is zero-based
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeZone(TimeZone.getDefault());
         calendar.set(Calendar.YEAR, simpleCalendar.getYear());
-        calendar.set(Calendar.HOUR, simpleCalendar.getHour());
+        calendar.set(Calendar.MONTH, simpleCalendar.getMonth() - 1);    // month is zero-based
+        calendar.set(Calendar.DAY_OF_MONTH, simpleCalendar.getDay());
+        calendar.set(Calendar.HOUR_OF_DAY, simpleCalendar.getHour());
         calendar.set(Calendar.MINUTE, simpleCalendar.getMinute());
         return calendar;
     }

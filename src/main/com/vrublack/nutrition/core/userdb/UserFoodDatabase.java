@@ -4,7 +4,6 @@ package com.vrublack.nutrition.core.userdb;
 import com.vrublack.nutrition.core.*;
 import com.vrublack.nutrition.core.search.FoodSearch;
 import com.vrublack.nutrition.core.search.LevenshteinFoodSearch;
-import com.vrublack.nutrition.core.SearchableFoodItem;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -85,7 +84,7 @@ public abstract class UserFoodDatabase implements SyncFoodDataSource
     {
         parseAsciiFile();
 
-        foodSearch = new LevenshteinFoodSearch(getSearchableFoodItems(), new DummySearchHistory());
+        foodSearch = new LevenshteinFoodSearch(getSearchableFoodItems());
     }
 
     /**
@@ -287,13 +286,13 @@ public abstract class UserFoodDatabase implements SyncFoodDataSource
 
 
     @Override
-    public List<SearchResultItem> search(String searchStr)
+    public List<SearchResultItem> search(String searchStr, SearchHistory history)
     {
-        return foodSearch.searchFood(searchStr);
+        return foodSearch.searchFood(searchStr, history);
     }
 
     @Override
-    public FoodItem retrieve(String id)
+    public FoodItem retrieve(String id, SearchHistory history)
     {
         for (FoodItem foodItem : entries)
             if (foodItem.getId().equals(id))

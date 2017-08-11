@@ -88,6 +88,11 @@ public class FoodSpecification extends Specification implements IsSerializable, 
         return id;
     }
 
+    public String getFoodId()
+    {
+        return foodItem.getId();
+    }
+
     @Override
     public float getCalories()
     {

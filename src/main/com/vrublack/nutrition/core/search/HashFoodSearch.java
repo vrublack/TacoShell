@@ -19,15 +19,11 @@ public class HashFoodSearch implements FoodSearch
     // use hashset as inner structure to make sure components of query don't get matched twice (milk -> "milk, buttermilk")
     private Map<String, Set<CanonicalSearchableFoodItem>> entryComps;
 
-    private SearchHistory searchHistory;
-
     private final DescriptionBase descriptionBase;
 
 
-    public HashFoodSearch(List<CanonicalSearchableFoodItem> entries, SearchHistory history, DescriptionBase base)
+    public HashFoodSearch(List<CanonicalSearchableFoodItem> entries, DescriptionBase base)
     {
-        searchHistory = history;
-
         descriptionBase = base;
 
         entryComps = new HashMap<>();
@@ -43,12 +39,12 @@ public class HashFoodSearch implements FoodSearch
     }
 
     @Override
-    public List<SearchResultItem> searchFood(String searchString)
+    public List<SearchResultItem> searchFood(String searchString, SearchHistory history)
     {
         String commonId = null;
-        if (searchHistory != null)
+        if (history != null)
         {
-            commonId = searchHistory.getNDBNumberForSearchResult(searchString);
+            commonId = history.getNDBNumberForSearchResult(searchString);
         }
 
         String[] queryComponents = descriptionBase.descriptionToBase(searchString);

@@ -7,5 +7,5 @@ import java.util.List;
 
 public interface FoodSearch
 {
-    List<SearchResultItem> searchFood(String searchString);
+    List<SearchResultItem> searchFood(String searchString, SearchHistory history);
 }

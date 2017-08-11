@@ -17,7 +17,7 @@ public class SyncFoodDataSourceAdapter implements SyncFoodDataSource
     }
 
     @Override
-    public List<SearchResultItem> search(String searchStr)
+    public List<SearchResultItem> search(String searchStr, SearchHistory history)
     {
         final CountDownLatch countDownLatch = new CountDownLatch(1);
         // a wrapper has to be used because the variable needs to be final
@@ -42,7 +42,7 @@ public class SyncFoodDataSourceAdapter implements SyncFoodDataSource
     }
 
     @Override
-    public FoodItem retrieve(String id)
+    public FoodItem retrieve(String id, SearchHistory history)
     {
         final CountDownLatch countDownLatch = new CountDownLatch(1);
         // a wrapper has to be used because the variable needs to be final

@@ -66,8 +66,8 @@ public class SearchEvaluation
         long stemTime = 0;
         int count = 0;
 
-        FoodSearch levenshteinSearch = new LevenshteinFoodSearch(db.getSearchableFoodItems(), null);
-        FoodSearch stemSearch = new HashFoodSearch(db.getCanonicalSearchableFoodItems(), null, DescriptionBase.getDescriptionBase(new FileInputStream("food_english.0")));
+        FoodSearch levenshteinSearch = new LevenshteinFoodSearch(db.getSearchableFoodItems());
+        FoodSearch stemSearch = new HashFoodSearch(db.getCanonicalSearchableFoodItems(), DescriptionBase.getDescriptionBase(new FileInputStream("food_english.0")));
 
         for (int i = 0; i < queryIdPairs.size(); i++)
         {
@@ -101,7 +101,7 @@ public class SearchEvaluation
 
     private float evaluateSearch(String searchStr, String expectedId, FoodSearch search)
     {
-        List<SearchResultItem> results = db.search(searchStr, search);
+        List<SearchResultItem> results = db.search(searchStr, new LocalSearchHistory());
         int index = results.indexOf(new SearchResultItem(expectedId, null, null, -1, -1));
         if (index == -1)
             return Float.POSITIVE_INFINITY;
