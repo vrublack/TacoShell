@@ -4,7 +4,9 @@ import com.google.gwt.user.client.rpc.IsSerializable;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class DailyRecord implements Serializable, IsSerializable
 {
@@ -16,12 +18,14 @@ public class DailyRecord implements Serializable, IsSerializable
 
     private SimpleCalendar date;
 
+    private Map<Integer, String> mealCheckpoints;
 
     public DailyRecord()
     {
         entries = new ArrayList<>();
         date = new SimpleCalendar();
         addedDates = new ArrayList<>();
+        mealCheckpoints = new HashMap<>();
     }
 
     public DailyRecord(SimpleCalendar date)
@@ -33,11 +37,45 @@ public class DailyRecord implements Serializable, IsSerializable
         this.date.setMinute(0);
         entries = new ArrayList<>();
         addedDates = new ArrayList<>();
+        mealCheckpoints = new HashMap<>();
     }
 
     public Specification getEntry(int pos)
     {
         return entries.get(pos);
+    }
+
+    /**
+     * Adds checkpoint, which could represent the end of a meal.
+     *
+     * @param index After which index the checkpoint should be
+     * @param label Label of the meal
+     */
+    public void addMealCheckpoint(int index, String label)
+    {
+        if (mealCheckpoints == null)
+            mealCheckpoints = new HashMap<>();
+        mealCheckpoints.put(index, label);
+    }
+
+    /**
+     * @param index Index after which the checkpoint would be
+     * @return Label or null if no such checkpoint exists
+     */
+    public String getMealCheckpoint(int index)
+    {
+        if (mealCheckpoints == null)
+            return null;
+        else
+            return mealCheckpoints.get(index);
+    }
+
+    public int getMealCheckpointNum()
+    {
+        if (mealCheckpoints == null)
+            return 0;
+        else
+            return mealCheckpoints.size();
     }
 
     public SimpleCalendar getAddedDate(int pos)
@@ -76,8 +114,19 @@ public class DailyRecord implements Serializable, IsSerializable
         for (int i = 0; i < entries.size(); i++)
             if (entries.get(i).getId().equals(specificationId))
             {
+                // need to decrease mappings after this
+                for (int j = i; j < entries.size(); j++)
+                {
+                    if (mealCheckpoints.containsKey(j))
+                    {
+                        if (j - 1 >= 0 && !mealCheckpoints.containsKey(j - 1))
+                            mealCheckpoints.put(j - 1, mealCheckpoints.get(j));
+                        mealCheckpoints.remove(j);
+                    }
+                }
                 entries.remove(i);
                 addedDates.remove(i);
+
                 return true;
             }
         return false;
@@ -87,6 +136,7 @@ public class DailyRecord implements Serializable, IsSerializable
     {
         entries = new ArrayList<>();
         addedDates = new ArrayList<>();
+        mealCheckpoints = new HashMap<>();
     }
 
     public SimpleCalendar getDate()
@@ -116,9 +166,9 @@ public class DailyRecord implements Serializable, IsSerializable
         }
 
         if (calorieSum == 0)
-            return new float[] {0, 0, 0};
+            return new float[]{0, 0, 0};
 
-        return new float[] {
+        return new float[]{
                 100 * nutrientGrams[0] * 4 / calorieSum,
                 100 * nutrientGrams[1] * 9 / calorieSum,
                 100 * nutrientGrams[2] * 4 / calorieSum,
@@ -132,6 +182,7 @@ public class DailyRecord implements Serializable, IsSerializable
     {
         private List<Specification> entries;
         private List<SimpleCalendar> addedDates;
+        private Map<Integer, String> mealCheckpoints;
         private SimpleCalendar date;
 
         public Memento(DailyRecord dailyRecord)
@@ -141,6 +192,9 @@ public class DailyRecord implements Serializable, IsSerializable
             entries.addAll(dailyRecord.entries);
             addedDates = new ArrayList<>();
             addedDates.addAll(dailyRecord.addedDates);
+            mealCheckpoints = new HashMap<>();
+            if (dailyRecord.mealCheckpoints != null)
+                mealCheckpoints.putAll(dailyRecord.mealCheckpoints);
             date = dailyRecord.date;
         }
 
@@ -148,6 +202,7 @@ public class DailyRecord implements Serializable, IsSerializable
         {
             dailyRecord.entries = entries;
             dailyRecord.addedDates = addedDates;
+            dailyRecord.mealCheckpoints = mealCheckpoints;
         }
 
         public DailyRecord getDailyRecord()
@@ -155,6 +210,7 @@ public class DailyRecord implements Serializable, IsSerializable
             DailyRecord record = new DailyRecord(date);
             record.entries = entries;
             record.addedDates = addedDates;
+            record.mealCheckpoints = mealCheckpoints;
             return record;
         }
     }

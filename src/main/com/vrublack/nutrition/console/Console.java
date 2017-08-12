@@ -17,6 +17,7 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
+
 public class Console
 {
     private final static String INI_FILENAME = "preferences.ini";
@@ -229,6 +230,13 @@ public class Console
                     recordManager.saveRecord(dailyRecord);
                     if (autoreport)
                         report();
+                } else if (input.startsWith("end"))
+                {
+                    createMemento();
+                    end(input);
+                    recordManager.saveRecord(dailyRecord);
+                    if (autoreport)
+                        report();
                 } else if (input.equals("delete") || input.equals("remove"))
                 {
                     delete();
@@ -267,6 +275,19 @@ public class Console
                 e.printStackTrace();
             }
         }
+    }
+
+    private void end(String input)
+    {
+        int labelIndex = input.indexOf(' ');
+        if (labelIndex == -1)
+        {
+            System.out.println("Error: you need to specify a label!");
+            return;
+        }
+        String label = input.substring(labelIndex + 1);
+
+        dailyRecord.addMealCheckpoint(dailyRecord.getEntryCount() - 1, label);
     }
 
     private void delete()
@@ -512,6 +533,9 @@ public class Console
                 },
                 {
                         "REPORT", "Shows added items for the current record.", "(no arguments)"
+                },
+                {
+                        "END", "Marks the end of the meal which will be shown in the report", "[label]\n\tlabel: Name for the meal"
                 },
                 {
                         "SWITCH", "Switches current record.", "[date term]\n\tdate term:\tTerm specifying a date. Either \"today\", \"yesterday\", a weekday, \"prev\", \"next\"," +

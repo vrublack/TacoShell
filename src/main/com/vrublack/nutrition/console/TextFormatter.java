@@ -155,7 +155,7 @@ public class TextFormatter extends Formatter
     public String format(DailyRecord dailyRecord)
     {
         // + 4 for header, 2 blank lines and total stats
-        final int matrixHeight = dailyRecord.getEntryCount() + 5;
+        final int matrixHeight = dailyRecord.getEntryCount() + 6 + dailyRecord.getMealCheckpointNum() * 3;
         final int matrixWidth = shownNutrients.size() + 4;
 
         List<String> emptyLineArray = new ArrayList<>();
@@ -172,7 +172,7 @@ public class TextFormatter extends Formatter
         }
 
         matrix.setRow(0, headerRow.toArray(new String[headerRow.size()]));
-        matrix.setRow(1, emptyLine);
+        matrix.setNextRow(emptyLine);
 
         SimpleDateFormat dateFormat = new SimpleDateFormat("HH");
 
@@ -181,6 +181,9 @@ public class TextFormatter extends Formatter
             specifications.add(p.first);
         SpecificationList specificationList = new SpecificationList(specifications, shownNutrients, desiredUnits);
         List<Map<String, NutrientQuantity>> columns = specificationList.getNutrientColumns();
+
+        List<Float> lastCheckpointTotals = null;
+        float lastCheckpointKcal = 0;
 
         for (int i = 0; i < dailyRecord.getEntryCount(); i++)
         {
@@ -212,7 +215,6 @@ public class TextFormatter extends Formatter
             newRow.add(format(entry.getCalories()));
             for (int i1 = 0; i1 < shownNutrients.size(); i1++)
             {
-                Specification.NutrientType type = shownNutrients.get(i1);
                 NutrientQuantity quantity = columns.get(i1).get(entry.getId());
                 String formattedAmount = format(quantity.getAmountInUnit());
                 if (!formattedAmount.equals("-") &&
@@ -223,10 +225,36 @@ public class TextFormatter extends Formatter
                 newRow.add(formattedAmount);
             }
 
-            matrix.setRow(i + 2, newRow.toArray(new String[newRow.size()]));
+            matrix.setNextRow(newRow.toArray(new String[newRow.size()]));
+
+            if (dailyRecord.getMealCheckpoint(i) != null)
+            {
+                // add checkpoint
+                List<String> totalStatsRow = new ArrayList<>();
+                totalStatsRow.add("MEAL");
+                totalStatsRow.add("");
+                totalStatsRow.add(dailyRecord.getMealCheckpoint(i));
+                float accumKcal = specificationList.getTotalKcal(i);
+                totalStatsRow.add(format(accumKcal - lastCheckpointKcal));
+                List<Float> accumTotals = specificationList.getTotals(i);
+                for (int j = 0; j < shownNutrients.size(); j++)
+                {
+                    float newAmount = accumTotals.get(j);
+                    if (lastCheckpointTotals != null)
+                        newAmount -= lastCheckpointTotals.get(j);
+                    totalStatsRow.add(format(newAmount) + " " + format(desiredUnits.get(j)));
+                }
+                matrix.setNextRow(emptyLine);
+                matrix.setNextRow(totalStatsRow.toArray(new String[totalStatsRow.size()]));
+                matrix.setNextRow(emptyLine);
+
+                lastCheckpointTotals = accumTotals;
+                lastCheckpointKcal = accumKcal;
+            }
         }
 
-        matrix.setRow(dailyRecord.getEntryCount() + 2, emptyLine);
+        matrix.setNextRow(emptyLine);
+        matrix.setNextRow(emptyLine);
 
         // TOTAL row
         List<String> totalStatsRow = new ArrayList<>();
@@ -237,10 +265,9 @@ public class TextFormatter extends Formatter
         List<Float> totals = specificationList.getTotals();
         for (int i = 0; i < shownNutrients.size(); i++)
         {
-            Specification.NutrientType type = shownNutrients.get(i);
             totalStatsRow.add(format(totals.get(i)) + " " + format(desiredUnits.get(i)));
         }
-        matrix.setRow(dailyRecord.getEntryCount() + 3, totalStatsRow.toArray(new String[totalStatsRow.size()]));
+        matrix.setNextRow(totalStatsRow.toArray(new String[totalStatsRow.size()]));
 
         // RATIO row
         List<String> ratioRow = new ArrayList<>();
@@ -285,7 +312,7 @@ public class TextFormatter extends Formatter
             }
             ratioRow.add(percentStr);
         }
-        matrix.setRow(dailyRecord.getEntryCount() + 4, ratioRow.toArray(new String[ratioRow.size()]));
+        matrix.setNextRow(ratioRow.toArray(new String[ratioRow.size()]));
 
         String dateStr = format(RecordManager.getCalendar(dailyRecord.getDate()), false);
         return "Report for " + dateStr + ":\n\n" + matrix.formatToString();

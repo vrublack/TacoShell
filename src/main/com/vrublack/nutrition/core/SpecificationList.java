@@ -7,6 +7,10 @@ import java.util.*;
  */
 public class SpecificationList
 {
+    private List<Specification.NutrientType> desiredNutrients;
+
+    private List<Specification> specifications;
+
     private List<Map<String, NutrientQuantity>> nutrientColumns = new ArrayList<>();
 
     private List<NutrientQuantity.Unit> defaultUnits = new ArrayList<>();
@@ -43,6 +47,9 @@ public class SpecificationList
     private void init(List<Specification> specifications, List<Specification.NutrientType> desiredNutrients,
                       List<NutrientQuantity.Unit> desiredUnits) throws IllegalArgumentException
     {
+        this.desiredNutrients = desiredNutrients;
+        this.specifications = specifications;
+
         if (desiredNutrients.size() != desiredUnits.size())
             throw new IllegalArgumentException("desiredNutrients.size() != desiredUnits.size()");
 
@@ -92,8 +99,7 @@ public class SpecificationList
 
         for (int i = 0; i < desiredNutrients.size(); i++)
         {
-            Specification.NutrientType desiredNutrient = desiredNutrients.get(i);
-            totals.add(getTotal(nutrientColumns.get(i).values(), defaultUnits.get(i)));
+            totals.add(getTotal(nutrientColumns.get(i).values(), defaultUnits.get(i), specifications.size() - 1));
         }
 
         for (Specification specification : specifications)
@@ -125,12 +131,16 @@ public class SpecificationList
         return maxUnit;
     }
 
-    private Float getTotal(Collection<NutrientQuantity> nutrientQuantities, NutrientQuantity.Unit unit)
+    private Float getTotal(Collection<NutrientQuantity> nutrientQuantities, NutrientQuantity.Unit unit, int index)
     {
         Float total = 0f;
 
+        int count = 0;
         for (NutrientQuantity nutrientQuantity : nutrientQuantities)
         {
+            if (count++ > index)
+                break;
+
             // Ignore units that are not the same as the default unit for now.
             // In the future, they could also be converted, although that's more
             // tricky with % Daily value and IU
@@ -160,10 +170,26 @@ public class SpecificationList
     }
 
     /**
-     * @return Sums of each nutrient column in the default unit for tha column
+     * @return Sums of each nutrient column in the default unit for that column
      */
     public List<Float> getTotals()
     {
+        return totals;
+    }
+
+    /**
+     * @param index Index (inclusive) to which items should be summed up
+     * @return Sums of each nutrient column in the default unit for that column
+     */
+    public List<Float> getTotals(int index)
+    {
+        List<Float> totals = new ArrayList<>();
+
+        for (int i = 0; i < desiredNutrients.size(); i++)
+        {
+            totals.add(getTotal(nutrientColumns.get(i).values(), defaultUnits.get(i), index));
+        }
+
         return totals;
     }
 
@@ -174,4 +200,21 @@ public class SpecificationList
     {
         return totalKcal;
     }
+
+    /**
+     * @param index Index (inclusive) to which items should be summed up
+     * @return Sum of all kcal
+     */
+    public float getTotalKcal(int index)
+    {
+        float totalKcal = 0;
+        for (int i = 0; i < Math.min(index + 1, specifications.size()); i++)
+        {
+            Specification specification = specifications.get(i);
+            totalKcal += specification.getCalories();
+        }
+
+        return totalKcal;
+    }
+
 }
