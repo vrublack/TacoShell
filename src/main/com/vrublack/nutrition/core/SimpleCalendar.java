@@ -98,7 +98,7 @@ public class SimpleCalendar implements Serializable, IsSerializable, Comparable<
     }
 
     /**
-     * @return Date in format yyyy-MM-dd hh:mm
+     * @return Date in format yyyy-MM-dd HH:mm
      */
     public String fullFormat()
     {
