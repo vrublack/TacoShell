@@ -37,6 +37,16 @@ public class NutrientQuantity implements IsSerializable, Serializable
 
     private float amountInUnit;
 
+
+    /**
+     *
+     * @return New quantity with amount rounded to an integer
+     */
+    public NutrientQuantity round()
+    {
+        return new NutrientQuantity(Math.round(amountInUnit), unit);
+    }
+
     /**
      * @param input Unit that the user has entered
      * @return Unit or null if the input wasn't recognized. Capitalization and whitespaces are removed.
@@ -157,6 +167,15 @@ public class NutrientQuantity implements IsSerializable, Serializable
     @Override
     public String toString()
     {
-        return amountInUnit + unit.toString();
+        return amountInUnit + " " + unit.toString();
+    }
+
+    /**
+     *
+     * @return Same as toString() but with amount rounded to the closest integer
+     */
+    public String rounded()
+    {
+        return Math.round(amountInUnit) + " " + unit.toString();
     }
 }

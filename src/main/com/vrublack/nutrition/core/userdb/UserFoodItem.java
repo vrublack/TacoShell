@@ -167,10 +167,10 @@ public class UserFoodItem extends SearchableFoodItem implements IsSerializable, 
         NutrientQuantity protein = getNutrientPerQuantity(Specification.NutrientType.Protein, referenceQuantity);
         NutrientQuantity fat = getNutrientPerQuantity(Specification.NutrientType.Fat, referenceQuantity);
 
-        return "Per 100g - Calories: " + getCaloriesPerQuantity(referenceQuantity)
-                + "kcal | Fat: " + (fat == null ? "-" : fat)
-                + " | Carbs: " + (carbs == null ? "-" : carbs)
-                + " | Protein: " + (protein == null ? "-" : protein);
+        return "Per 100g - Calories: " + Math.round(getCaloriesPerQuantity(referenceQuantity))
+                + " kcal | Fat: " + (fat == null ? "-" : fat.rounded())
+                + " | Carbs: " + (carbs == null ? "-" : carbs.rounded())
+                + " | Protein: " + (protein == null ? "-" : protein.rounded());
     }
 
     public static class CommonMeasure implements IsSerializable, Serializable

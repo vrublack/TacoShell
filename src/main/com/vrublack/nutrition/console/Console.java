@@ -798,20 +798,15 @@ public class Console
         final int entryLimit = Math.min(50, results.size());
         int currentPos = 0;
 
-        float[] percentileReference = new float[Math.min(10, results.size())];
-        for (int i = 0; i < percentileReference.length; i++)
-            percentileReference[i] = results.get(i).getRelativePopularity();
-        PercentileScale percentileScale = new PercentileScale(percentileReference);
-
         // make matrix with all the search results up to entryLimit
         final int matrixHeight = entryLimit + 1;
         final int matrixWidth = 3;
         TextMatrix matrix = new TextMatrix(matrixWidth, matrixHeight);
-        matrix.setRow(0, new String[]{"", "DESCRIPTION", "POPULARITY"});
+        matrix.setRow(0, new String[]{"", "DESCRIPTION", "NUTRITION INFO"});
         for (int i = 0; i < entryLimit; i++)
         {
-            float scaledPopularity = 100 * percentileScale.getPercentile(results.get(i).getRelativePopularity());
-            matrix.setRow(i + 1, new String[]{"[" + (i + 1) + "]", results.get(i).toString(), formatter.formatPopularity(scaledPopularity)});
+            SearchResultItem item = results.get(i);
+            matrix.setRow(i + 1, new String[]{"[" + (i + 1) + "]", item.toString(), item.getNutritionInformation()});
         }
         String[] formattedLines = matrix.formatToLines();
 
@@ -934,20 +929,15 @@ public class Console
         final String prompt = "Type in a number, \"esc\" or \"more\": ";
         System.out.println(prompt);
 
-        float[] percentileReference = new float[Math.min(10, results.size())];
-        for (int i = 0; i < percentileReference.length; i++)
-            percentileReference[i] = results.get(i).getRelativePopularity();
-        PercentileScale percentileScale = new PercentileScale(percentileReference);
-
         // make matrix with all the search results up to entryLimit
         final int matrixHeight = entryLimit + 1;
         final int matrixWidth = 3;
         TextMatrix matrix = new TextMatrix(matrixWidth, matrixHeight);
-        matrix.setRow(0, new String[]{"", "DESCRIPTION", "POPULARITY"});
+        matrix.setRow(0, new String[]{"", "DESCRIPTION", "NUTRITION INFO"});
         for (int i = 0; i < entryLimit; i++)
         {
-            float scaledPopularity = 100 * percentileScale.getPercentile(results.get(i).getRelativePopularity());
-            matrix.setRow(i + 1, new String[]{"[" + (i + 1) + "]", results.get(i).toString(), formatter.formatPopularity(scaledPopularity)});
+            SearchResultItem item = results.get(i);
+            matrix.setRow(i + 1, new String[]{"[" + (i + 1) + "]", item.toString(), item.getNutritionInformation()});
         }
         String[] formattedLines = matrix.formatToLines();
 
