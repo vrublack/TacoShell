@@ -33,7 +33,7 @@ public class Console
 
     private TextFormatter formatter;
 
-    private SearchHistory history = new LocalSearchHistory();
+    private SearchHistory history = LocalSearchHistory.getInstance();
 
     private boolean autoreport;
 

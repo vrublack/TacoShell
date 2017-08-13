@@ -1,6 +1,7 @@
 package com.vrublack.nutrition.core.userdb;
 
 
+import com.vrublack.nutrition.console.LocalSearchHistory;
 import com.vrublack.nutrition.core.*;
 import com.vrublack.nutrition.core.search.FoodSearch;
 import com.vrublack.nutrition.core.search.LevenshteinFoodSearch;
@@ -17,8 +18,6 @@ public abstract class UserFoodDatabase implements SyncFoodDataSource
 {
     private List<UserFoodItem> entries;
 
-    // search history that is being used in search
-    private SearchHistory searchHistory = new DummySearchHistory();
     private String lastSearchStr;
 
     private FoodSearch foodSearch;
@@ -288,6 +287,7 @@ public abstract class UserFoodDatabase implements SyncFoodDataSource
     @Override
     public List<SearchResultItem> search(String searchStr, SearchHistory history)
     {
+        lastSearchStr = searchStr;
         return foodSearch.searchFood(searchStr, history);
     }
 
@@ -300,7 +300,7 @@ public abstract class UserFoodDatabase implements SyncFoodDataSource
                 // update search feedback
                 if (lastSearchStr != null)
                 {
-                    searchHistory.putNDBNumberForSearchResult(lastSearchStr, id);
+                    history.putNDBNumberForSearchResult(lastSearchStr, id);
                     lastSearchStr = null;
                 }
 

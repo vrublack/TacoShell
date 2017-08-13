@@ -13,12 +13,15 @@ import java.util.List;
  */
 public class LocalSearchHistory implements SearchHistory
 {
+    // singleton pattern
+    private static LocalSearchHistory instance;
+
     private final static String LOCAL_FILE_PATH = "search_stats";
 
     // a Map would be faster but for a small number of entries this is irrelevant
     private ArrayList<SearchStringStat> stats;
 
-    public LocalSearchHistory()
+    private LocalSearchHistory()
     {
         ObjectInputStream ois = null;
         try
@@ -42,6 +45,13 @@ public class LocalSearchHistory implements SearchHistory
                     e.printStackTrace();
                 }
         }
+    }
+
+    public static LocalSearchHistory getInstance()
+    {
+        if (instance == null)
+            instance = new LocalSearchHistory();
+        return instance;
     }
 
     @Override
@@ -113,7 +123,6 @@ public class LocalSearchHistory implements SearchHistory
     }
 
     /**
-     *
      * @return List of pairs (query, most commond id for that query)
      */
     public List<Pair<String, String>> getQueryIdPairs()

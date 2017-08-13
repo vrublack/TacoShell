@@ -16,7 +16,7 @@ import java.util.List;
 
 public class SearchEvaluation
 {
-    private LocalSearchHistory hist = new LocalSearchHistory();
+    private LocalSearchHistory hist = LocalSearchHistory.getInstance();
 
     private LocalUSDAFoodDatabase db = new LocalUSDAFoodDatabase();    // don't use search history
 
@@ -101,7 +101,7 @@ public class SearchEvaluation
 
     private float evaluateSearch(String searchStr, String expectedId, FoodSearch search)
     {
-        List<SearchResultItem> results = db.search(searchStr, new LocalSearchHistory());
+        List<SearchResultItem> results = db.search(searchStr, LocalSearchHistory.getInstance());
         int index = results.indexOf(new SearchResultItem(expectedId, null, null, -1, -1));
         if (index == -1)
             return Float.POSITIVE_INFINITY;
