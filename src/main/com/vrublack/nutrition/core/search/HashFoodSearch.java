@@ -21,6 +21,7 @@ public class HashFoodSearch implements FoodSearch
 
     private final DescriptionBase descriptionBase;
 
+    private static final int commonIdMatch = 200;
 
     public HashFoodSearch(List<CanonicalSearchableFoodItem> entries, DescriptionBase base)
     {
@@ -59,10 +60,10 @@ public class HashFoodSearch implements FoodSearch
 
             for (CanonicalSearchableFoodItem item : entryComps.get(queryComp))
             {
-                float matchScore = match(item, queryComp, commonId);
+                float matchScore = match(item, queryComp);
 
                 if (!matchScores.containsKey(item))
-                    matchScores.put(item, 0f);
+                    matchScores.put(item, item.getId().equals(commonId) ? commonIdMatch : 0f);
                 matchScores.put(item, matchScores.get(item) + matchScore);
             }
         }
@@ -90,16 +91,10 @@ public class HashFoodSearch implements FoodSearch
     /**
      * @param item      Potential matching item
      * @param queryComp Comp of the query that the user entered
-     * @param commonId  Id of food item that users have previously chosen for the query
      * @return Score indicating how well the item matches the queryComp
      */
-    private float match(CanonicalSearchableFoodItem item, String queryComp, String commonId)
+    private float match(CanonicalSearchableFoodItem item, String queryComp)
     {
-        // if the specific search string was entered before and this foodItem item was what the user was looking for,
-        // it is very likely that the user is looking for the same item again
-        if (item.getId().equals(commonId))
-            return 200;
-
         float matchScore = 40 * getPositionFactorForComponent(item.getPriorityForCanonicalComp(queryComp));
 
         if (matchScore > 0)
