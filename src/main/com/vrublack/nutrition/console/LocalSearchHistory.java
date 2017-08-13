@@ -59,7 +59,7 @@ public class LocalSearchHistory implements SearchHistory
     }
 
     @Override
-    public void putNDBNumberForSearchResult(final String searchString, final String selectedNDBNumber)
+    public synchronized void putNDBNumberForSearchResult(final String searchString, final String selectedNDBNumber)
     {
         // this can be offloaded into a background thread
         Thread t = new Thread()
