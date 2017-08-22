@@ -99,7 +99,7 @@ public class SpecificationList
 
         for (int i = 0; i < desiredNutrients.size(); i++)
         {
-            totals.add(getTotal(nutrientColumns.get(i).values(), defaultUnits.get(i), specifications.size() - 1));
+            totals.add(getTotal(nutrientColumns.get(i), defaultUnits.get(i), specifications.size() - 1));
         }
 
         for (Specification specification : specifications)
@@ -131,12 +131,12 @@ public class SpecificationList
         return maxUnit;
     }
 
-    private Float getTotal(Collection<NutrientQuantity> nutrientQuantities, NutrientQuantity.Unit unit, int index)
+    private Float getTotal(Map<String, NutrientQuantity> nutrientQuantities, NutrientQuantity.Unit unit, int index)
     {
         Float total = 0f;
 
         int count = 0;
-        for (NutrientQuantity nutrientQuantity : nutrientQuantities)
+        for (Specification spec : specifications)
         {
             if (count++ > index)
                 break;
@@ -144,8 +144,9 @@ public class SpecificationList
             // Ignore units that are not the same as the default unit for now.
             // In the future, they could also be converted, although that's more
             // tricky with % Daily value and IU
-            if (nutrientQuantity.getUnit() == unit)
-                total += nutrientQuantity.getAmountInUnit();
+            NutrientQuantity q = nutrientQuantities.get(spec.getId());
+            if (q.getUnit() == unit)
+                total += q.getAmountInUnit();
         }
 
         return total;
@@ -187,7 +188,7 @@ public class SpecificationList
 
         for (int i = 0; i < desiredNutrients.size(); i++)
         {
-            totals.add(getTotal(nutrientColumns.get(i).values(), defaultUnits.get(i), index));
+            totals.add(getTotal(nutrientColumns.get(i), defaultUnits.get(i), index));
         }
 
         return totals;
