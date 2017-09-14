@@ -1,7 +1,6 @@
 package com.vrublack.nutrition.core.userdb;
 
 
-import com.vrublack.nutrition.console.LocalSearchHistory;
 import com.vrublack.nutrition.core.*;
 import com.vrublack.nutrition.core.search.FoodSearch;
 import com.vrublack.nutrition.core.search.LevenshteinFoodSearch;
@@ -285,10 +284,9 @@ public abstract class UserFoodDatabase implements SyncFoodDataSource
 
 
     @Override
-    public List<SearchResultItem> search(String searchStr, SearchHistory history)
+    public List<SearchResultItem> search(String searchStr, SearchHistory history, boolean autocomplete)
     {
-        lastSearchStr = searchStr;
-        return foodSearch.searchFood(searchStr, history);
+        return foodSearch.searchFood(searchStr, history, autocomplete);
     }
 
     @Override

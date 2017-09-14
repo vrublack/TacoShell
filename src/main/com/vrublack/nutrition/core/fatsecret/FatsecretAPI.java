@@ -67,8 +67,10 @@ public class FatsecretAPI implements SyncFoodDataSource
     }
 
     @Override
-    public List<SearchResultItem> search(String searchStr, SearchHistory history)
+    public List<SearchResultItem> search(String searchStr, SearchHistory history, boolean autocomplete)
     {
+        // autocomplete not supported
+
         try
         {
             FatSecretAPIHelper apiHelper = new FatSecretAPIHelper(apiKey, apiSecret);

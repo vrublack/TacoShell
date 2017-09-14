@@ -23,24 +23,22 @@ public abstract class RecordManager
 
     public abstract void saveRecord(DailyRecord record);
 
-
     /**
      * @return Record for today. Creates new one if it doesn't exist.
      */
-    public DailyRecord getRecordForToday()
+    public DailyRecord getRecordForToday(SimpleCalendar today)
     {
         if (availableRecords == null)
             availableRecords = loadFileNames();
 
-        Calendar today = new GregorianCalendar();
-        String fileName = getDateString(today);
+        String fileName = getDateString(getCalendar(today));
 
         DailyRecord record = getRecordForDay(today);
 
         if (record == null)
         {
             // create new record for today
-            record = new DailyRecord(getSimpleCalendar(today));
+            record = new DailyRecord(today);
             availableRecords.add(fileName);
             loadedRecords.put(fileName, record);
             saveRecord(record);

@@ -167,6 +167,9 @@ public class UnitConverter
      */
     public static FoodQuantity matchUnit(FoodQuantity source, FoodQuantity[] acceptedUnits, boolean strict)
     {
+        if (source.getSimpleUnit().equals("kcal"))
+            throw new IllegalArgumentException("Use method quantityForCalories instead for kcal!");
+
         // try to find exact match for detailed unit
         for (FoodQuantity foodQuantity : acceptedUnits)
         {

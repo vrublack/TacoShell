@@ -53,6 +53,11 @@ public abstract class USDAFoodDatabase implements SyncFoodDataSource
         }
     }
 
+    public USDAFoodDatabase(List<USDAFoodItem> entries)
+    {
+        this.entries = entries;
+    }
+
     /**
      * @return BufferedReader that points to the USDA ascii file
      */
@@ -262,9 +267,9 @@ public abstract class USDAFoodDatabase implements SyncFoodDataSource
 
 
     @Override
-    public List<SearchResultItem> search(String searchStr, SearchHistory history)
+    public List<SearchResultItem> search(String searchStr, SearchHistory history, boolean autocomplete)
     {
-        return search(searchStr, search, history);
+        return search(searchStr, search, history, autocomplete);
     }
 
     public List<CanonicalSearchableFoodItem> getCanonicalSearchableFoodItems()
@@ -281,10 +286,10 @@ public abstract class USDAFoodDatabase implements SyncFoodDataSource
         return searchableFoodItems;
     }
 
-    public List<SearchResultItem> search(String searchStr, FoodSearch search, SearchHistory history)
+    public List<SearchResultItem> search(String searchStr, FoodSearch search, SearchHistory history, boolean autocomplete)
     {
         lastSearchStr = searchStr;
-        return search.searchFood(searchStr, history);
+        return search.searchFood(searchStr, history, autocomplete);
     }
 
 
@@ -315,5 +320,10 @@ public abstract class USDAFoodDatabase implements SyncFoodDataSource
                 return foodItem;
             }
         return null;
+    }
+
+    public List<USDAFoodItem> getEntries()
+    {
+        return entries;
     }
 }

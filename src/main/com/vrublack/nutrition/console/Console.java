@@ -23,7 +23,7 @@ public class Console
     private final static String INI_FILENAME = "preferences.ini";
 
     private RecordManager recordManager = new LocalRecordManager();
-    private DailyRecord dailyRecord = recordManager.getRecordForToday();
+    private DailyRecord dailyRecord = recordManager.getRecordForToday(RecordManager.getSimpleCalendar(new GregorianCalendar()));
 
     private SyncFoodDataSource dataSource;
 
@@ -620,7 +620,8 @@ public class Console
         switch (expression)
         {
             case "today":
-                requestedDailyRecord = recordManager.getRecordForToday();
+                GregorianCalendar today = new GregorianCalendar();
+                requestedDailyRecord = recordManager.getRecordForToday(RecordManager.getSimpleCalendar(today));
                 break;
             case "yesterday":
                 Calendar yesterday = new GregorianCalendar();
@@ -788,7 +789,7 @@ public class Console
 
     private void search(String description)
     {
-        List<SearchResultItem> results = new CompositeFoodSource(dataSource, userFoodDatabase).search(description, history);
+        List<SearchResultItem> results = new CompositeFoodSource(dataSource, userFoodDatabase).search(description, history, false);
         printSearchResults(results);
     }
 
@@ -871,7 +872,7 @@ public class Console
                 FoodInputExpression foodInputExpression = new FoodInputExpressionParser().parse(input);
 
                 // search for foodItem in the database
-                List<SearchResultItem> results = new CompositeFoodSource(dataSource, userFoodDatabase).search(foodInputExpression.getDescription(), history);
+                List<SearchResultItem> results = new CompositeFoodSource(dataSource, userFoodDatabase).search(foodInputExpression.getDescription(), history, false);
                 if (results.isEmpty())
                 {
                     System.out.println("No matches were found in the database. Consider adding the nutrients directly, like \"add 75g protein, 30g carbs\"");

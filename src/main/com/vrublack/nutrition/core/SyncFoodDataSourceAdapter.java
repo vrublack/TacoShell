@@ -17,7 +17,7 @@ public class SyncFoodDataSourceAdapter implements SyncFoodDataSource
     }
 
     @Override
-    public List<SearchResultItem> search(String searchStr, SearchHistory history)
+    public List<SearchResultItem> search(String searchStr, SearchHistory history, boolean autocomplete)
     {
         final CountDownLatch countDownLatch = new CountDownLatch(1);
         // a wrapper has to be used because the variable needs to be final

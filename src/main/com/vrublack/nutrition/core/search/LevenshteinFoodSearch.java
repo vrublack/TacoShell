@@ -23,8 +23,10 @@ public class LevenshteinFoodSearch implements FoodSearch
     }
 
     @Override
-    public List<SearchResultItem> searchFood(String searchString, SearchHistory history)
+    public List<SearchResultItem> searchFood(String searchString, SearchHistory history, boolean autocomplete)
     {
+        // autocomplete is not yet implemented here, so ignore
+
         String ndbNumber = null;
         if (history != null)
         {
@@ -52,7 +54,8 @@ public class LevenshteinFoodSearch implements FoodSearch
             public int compare(InternalResultItem o1, InternalResultItem o2)
             {
                 if (o1.score == o2.score)
-                    return 0;
+                    // do this to prevent undefined search order
+                    return o1.foodItem.getDescription().compareTo(o2.foodItem.getDescription());
                 else if (o1.score < o2.score)
                     return 1;
                 else
@@ -80,6 +83,11 @@ public class LevenshteinFoodSearch implements FoodSearch
     private float match(String[] searchComps, SearchableFoodItem entry, String commonNdbNumberForSearchString)
     {
         SearchableFoodItem.DescriptionComp[] descriptionComps = entry.getDescriptionComps();
+
+        // if the specific search string was entered before and this foodItem item was what the user was looking for,
+        // it is very likely that the user is looking for the same item again
+        if (entry.getId().equals(commonNdbNumberForSearchString))
+            return 200;
 
         float score = 0;
         // this prevents that search components are matched multiple times, such as "milk, buttermilk" when search for "milk", because
@@ -142,11 +150,6 @@ public class LevenshteinFoodSearch implements FoodSearch
                     break;
                 }
         }
-
-        // if the specific search string was entered before and this foodItem item was what the user was looking for,
-        // it is very likely that the user is looking for the same item again
-        if (entry.getId().equals(commonNdbNumberForSearchString))
-            score += 200;
 
         return score;
     }
