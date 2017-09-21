@@ -23,10 +23,10 @@ public class CompositeFoodSource implements SyncFoodDataSource
     }
 
     @Override
-    public List<SearchResultItem> search(String searchStr, SearchHistory history)
+    public List<SearchResultItem> search(String searchStr, SearchHistory history, boolean autocomplete)
     {
-        List<SearchResultItem> leftResults = left.search(searchStr, history);
-        List<SearchResultItem> rightResults = right.search(searchStr, history);
+        List<SearchResultItem> leftResults = left.search(searchStr, history, autocomplete);
+        List<SearchResultItem> rightResults = right.search(searchStr, history, autocomplete);
 
         List<SearchResultItem> all = new ArrayList<>();
         all.addAll(leftResults);

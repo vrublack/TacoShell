@@ -7,5 +7,5 @@ import java.util.List;
 
 public interface FoodSearch
 {
-    List<SearchResultItem> searchFood(String searchString, SearchHistory history);
+    List<SearchResultItem> searchFood(String searchString, SearchHistory history, boolean autocomplete);
 }

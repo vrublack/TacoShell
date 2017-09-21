@@ -26,6 +26,6 @@ public class LocalUSDAFoodDatabase extends USDAFoodDatabase
     @Override
     public DescriptionBase getDescriptionBase() throws FileNotFoundException
     {
-        return DescriptionBase.getDescriptionBase(new FileInputStream("food_english.0"));
+        return DescriptionBase.getDescriptionBase(new FileInputStream("food_english.0"), new FileInputStream("food_scored.txt"));
     }
 }

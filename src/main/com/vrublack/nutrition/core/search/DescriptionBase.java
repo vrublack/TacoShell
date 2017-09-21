@@ -3,13 +3,14 @@ package com.vrublack.nutrition.core.search;
 import com.swabunga.spell.engine.SpellDictionaryHashMap;
 import com.swabunga.spell.engine.Word;
 import com.swabunga.spell.event.SpellChecker;
+import com.vrublack.nutrition.core.Pair;
 import org.tartarus.snowball.ext.englishStemmer;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 /**
  * Provides utilities to convert a description to a canonical, "base" form
@@ -18,15 +19,22 @@ public class DescriptionBase
 {
     private SpellDictionaryHashMap dictionary;
     private SpellChecker spellChecker;
+    // these are already contained in dictionary, but have protected access there...
+    private List<Pair<String, Float>> scoredDict;
 
     private englishStemmer stemmer;
 
-    public static DescriptionBase getDescriptionBase(InputStream is)
+    /**
+     * @param simpleDict IS pointing to text file with all words in separate lines
+     * @param scoredDict IS pointing to text file with "word,score" in each line
+     * @return
+     */
+    public static DescriptionBase getDescriptionBase(InputStream simpleDict, InputStream scoredDict)
     {
         DescriptionBase b = new DescriptionBase();
         try
         {
-            b.dictionary = new SpellDictionaryHashMap(new InputStreamReader(is));
+            b.dictionary = new SpellDictionaryHashMap(new InputStreamReader(simpleDict));
         } catch (IOException e)
         {
             e.printStackTrace();
@@ -36,6 +44,24 @@ public class DescriptionBase
         b.spellChecker = new SpellChecker(b.dictionary);
 
         b.stemmer = new englishStemmer();
+
+        b.scoredDict = new ArrayList<>();
+
+        // re-read input stream
+        try
+        {
+            BufferedReader br = new BufferedReader(new InputStreamReader(scoredDict));
+            String line;
+            while ((line = br.readLine()) != null)
+            {
+                String[] comps = line.split(",");
+                b.scoredDict.add(new Pair<>(comps[0], Float.parseFloat(comps[1])));
+            }
+
+        } catch (IOException e)
+        {
+            // this means autocomplete won't be available
+        }
 
         return b;
     }
@@ -65,6 +91,73 @@ public class DescriptionBase
                     decomposed.add(componentToBase(d));
         }
         return decomposed.toArray(new String[decomposed.size()]);
+    }
+
+    /**
+     * Like descriptionToBase(), but does autocomplete on the last component.
+     *
+     * @param desc Description string that the user has entered
+     * @return Like descriptionToBase(), but for each possible completion for the last word,
+     * an array of the entire decomposition plus the possible completion is returned.
+     * NOTE: possible completion might be multiple components.
+     */
+    public String[][] descriptionToBaseAutocomplete(String desc)
+    {
+        String[] comps = desc.split("[^\\w]");
+
+        List<String> decomposed = new ArrayList<>();
+        for (int i = 0; i < comps.length; i++)
+        {
+            String c = comps[i];
+            if (!c.isEmpty())
+                decomposed.addAll(Arrays.asList(decompose(c)));
+        }
+
+        if (decomposed.isEmpty())
+            return new String[][]{};
+        String lastWord = decomposed.get(decomposed.size() - 1);
+        // score in 1st comp because we want to sort by that later
+        List<Pair<Float, String>> possibleCompletions = new ArrayList<>();
+        // only do autocomplete on the last component
+        for (Pair<String, Float> dictWord : scoredDict)
+        {
+            if (dictWord.first.startsWith(lastWord))
+            {
+                possibleCompletions.add(new Pair<>(dictWord.second, dictWord.first));
+            }
+        }
+        Collections.sort(possibleCompletions);
+        List<String> possibleCompletionsFiltered = new ArrayList<>();
+        final int maxCompletions = 5;     // only take top N completions
+        for (int i = 0; i < maxCompletions && i < possibleCompletions.size(); i++)
+            possibleCompletionsFiltered.add(possibleCompletions.get(possibleCompletions.size() - i - 1).second);
+
+
+        // If there are no (literal) completions, to autocorrect on the last word as well.
+        // TODO Could do completion with error tolerance in the future, possibly.
+        if (possibleCompletionsFiltered.isEmpty())
+        {
+            possibleCompletionsFiltered.add(lastWord);
+        }
+
+        // for each possible completion make list (decomposed[0], ... , decomposed[n - 1], possible completion)
+        Set<String[]> allPoss = new HashSet<>();    // this avoids duplicates
+        for (String possibleCompletion : possibleCompletionsFiltered)
+        {
+            List<String> poss = new ArrayList<>();
+            int j;
+            for (j = 0; j < decomposed.size() - 1; j++)
+            {
+                poss.add(componentToBase(decomposed.get(j)));
+            }
+
+            // only add first one, otherwise those with multiple components would alwats be ranked better
+            // (example: tomato, tomato seed).
+            poss.add(componentToBase(decompose(possibleCompletion)[0]));
+            allPoss.add(poss.toArray(new String[poss.size()]));
+        }
+
+        return allPoss.toArray(new String[allPoss.size()][]);
     }
 
     /**

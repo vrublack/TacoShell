@@ -9,11 +9,12 @@ public interface SyncFoodDataSource
 {
 
     /**
-     * @param searchStr String to search for
-     * @param history   The history to use
+     * @param searchStr    String to search for
+     * @param history      The history to use
+     * @param autocomplete Whether to use autocomplete (set this to true if the user is still styping)
      * @return List of results or <code>null</code> if an error occurred
      */
-    List<SearchResultItem> search(String searchStr, SearchHistory history);
+    List<SearchResultItem> search(String searchStr, SearchHistory history, boolean autocomplete);
 
     /**
      * Returns item, but also submits this request to the search history. This should only be called if the user selected this entry.
