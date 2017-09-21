@@ -171,7 +171,11 @@ public abstract class RecordManager
              i >= 0 && availableRecords.get(i).compareTo(nDaysAgoFormat) >= 0; i--)
         {
             if (!availableRecords.get(i).equals(todayStr))
-                lastRecords.add(getRecordForDay(availableRecords.get(i)));
+            {
+                DailyRecord r = getRecordForDay(availableRecords.get(i));
+                if (r != null)
+                    lastRecords.add(r);
+            }
         }
 
         return lastRecords.toArray(new DailyRecord[lastRecords.size()]);
